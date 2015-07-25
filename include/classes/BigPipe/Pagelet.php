@@ -1,4 +1,6 @@
 <?php
+namespace BigPipe;
+
 class Pagelet {
 	private $ID           = NULL;
 	private $HTML         = NULL;

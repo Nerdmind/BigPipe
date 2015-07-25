@@ -1,4 +1,6 @@
 <?php
+namespace BigPipe;
+
 class BigPipe {
 	public  static $enabled  = TRUE;
 	private static $pagelets = [];

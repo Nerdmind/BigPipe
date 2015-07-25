@@ -7,14 +7,14 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 #====================================================================================================
 # Klassen und Funktionen einbinden
 #====================================================================================================
-require_once 'include/classes/class.bigpipe.php';
-require_once 'include/classes/class.pagelet.php';
+require_once 'include/classes/BigPipe/BigPipe.php';
+require_once 'include/classes/BigPipe/Pagelet.php';
 require_once 'include/functions.php';
 
 #====================================================================================================
 # Pagelet mit rotem Hintergrund
 #====================================================================================================
-$PageletRed = new Pagelet();
+$PageletRed = new BigPipe\Pagelet();
 $PageletRed->addHTML('<section id="red" class="text">I AM JUST A PAGELET WITH RED BACKGROUND</section>');
 $PageletRed->addCSS('static/red.php');
 $PageletRed->addJS('static/delayJS.php');
@@ -23,7 +23,7 @@ $PageletRed->addJSCode("document.getElementById('red').innerHTML += ' [JS execut
 #====================================================================================================
 # Pagelet mit blauem Hintergrund
 #====================================================================================================
-$PageletBlue = new Pagelet(60);
+$PageletBlue = new BigPipe\Pagelet(60);
 $PageletBlue->addHTML('<section id="blue" class="text">I AM JUST A PAGELET WITH BLUE BACKGROUND</section>');
 $PageletBlue->addCSS('static/blue.php');
 $PageletBlue->addJS('static/delayJS.php');
@@ -32,7 +32,7 @@ $PageletBlue->addJSCode("document.getElementById('blue').innerHTML += ' [JS exec
 #====================================================================================================
 # Pagelet mit grünem Hintergrund
 #====================================================================================================
-$PageletGreen = new Pagelet();
+$PageletGreen = new BigPipe\Pagelet();
 $PageletGreen->addHTML('<section id="green" class="text">I AM JUST A PAGELET WITH GREEN BACKGROUND</section>');
 $PageletGreen->addCSS('static/green.php');
 $PageletGreen->addJS('static/delayJS.php');
@@ -73,7 +73,7 @@ echo $PageletGreen;
 ?>
 
 <?php
-BigPipe::render();
+BigPipe\BigPipe::render();
 ?>
 </body>
 </html>
