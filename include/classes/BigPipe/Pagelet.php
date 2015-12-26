@@ -3,82 +3,117 @@ namespace BigPipe;
 
 class Pagelet {
 	private $ID           = NULL;
-	private $HTML         = NULL;
+	private $HTML         = "";
 	private $JSCode       = "";
-	private $CSSFiles     = [];
 	private $JSFiles      = [];
+	private $CSSFiles     = [];
+	private $phaseDoneJS  = [];
 	private static $count = 0;
 
-	public function __construct($priority = 50) {
+	#====================================================================================================
+	# Priorities for sorting the pagelets
+	#====================================================================================================
+	const PRIORITY_HIGHEST = 100;
+	const PRIORITY_HIGH    = 75;
+	const PRIORITY_NORMAL  = 50;
+	const PRIORITY_LOW     = 25;
+	const PRIORITY_LOWEST  = 0;
+
+	#====================================================================================================
+	# Callback phase numbers for PhaseDoneJS
+	#====================================================================================================
+	const PHASE_ARRIVE  = 0; # After the pagelet reached BigPipe
+	const PHASE_LOADCSS = 1; # After all the CSS resources have been loaded
+	const PHASE_PUTHTML = 2; # After the HTML content has been injected into the placeholders
+	const PHASE_LOADJS  = 3; # After all the JS resources have been loaded
+	const PHASE_EXECJS  = 4; # After the static JS code has been executed
+
+	public function __construct($priority = self::PRIORITY_NORMAL) {
+		$this->phaseDoneJS = array_pad([], 5, []);
 		$this->ID = 'P'.++self::$count;
+
 		BigPipe::addPagelet($this, $priority);
 	}
 
 	#====================================================================================================
-	# ID zurückgeben
+	# Return the unique ID
 	#====================================================================================================
 	public function getID() {
 		return $this->ID;
 	}
 
 	#====================================================================================================
-	# HTML-Code zurückgeben
+	# Return the HTML content
 	#====================================================================================================
 	public function getHTML() {
 		return $this->HTML;
 	}
 
 	#====================================================================================================
-	# CSS-Ressourcen zurückgeben
+	# Return the CSS resources
 	#====================================================================================================
 	public function getCSSFiles() {
 		return $this->CSSFiles;
 	}
 
 	#====================================================================================================
-	# JS-Ressourcen zurückgeben
+	# Return the JS resources
 	#====================================================================================================
 	public function getJSFiles() {
 		return $this->JSFiles;
 	}
 
 	#====================================================================================================
-	# JS-Code zurückgeben
+	# Return the main JS code
 	#====================================================================================================
 	public function getJSCode() {
 		return $this->JSCode;
 	}
 
 	#====================================================================================================
-	# HTML-Code hinzufügen
+	# Add HTML or attach more
 	#====================================================================================================
 	public function addHTML($HTML) {
-		$this->HTML .= $HTML;
+		return $this->HTML .= $HTML;
 	}
 
 	#====================================================================================================
-	# CSS-Ressource hinzufügen
+	# Attach a CSS resource
 	#====================================================================================================
 	public function addCSS($file) {
-		$this->CSSFiles[] = $file;
+		return $this->CSSFiles[] = $file;
 	}
 
 	#====================================================================================================
-	# JS-Ressource hinzufügen
+	# Attach a JS resource
 	#====================================================================================================
 	public function addJS($file) {
-		$this->JSFiles[] = $file;
+		return $this->JSFiles[] = $file;
 	}
 
 	#====================================================================================================
-	# JS-Code hinzufügen
+	# Add JS code or attach more
 	#====================================================================================================
 	public function addJSCode($code) {
-		$this->JSCode .= $code;
+		return $this->JSCode .= $code;
 	}
 
 	#====================================================================================================
-	# Magische Methode: __toString()
+	# Attach a PhaseDoneJS callback
+	#====================================================================================================
+	public function addPhaseDoneJS($phase, $callback) {
+		return $this->phaseDoneJS[$phase][] = removeLineBreaksAndTabs($callback);
+	}
+
+	#====================================================================================================
+	# Return all registered PhaseDoneJS callbacks
+	#====================================================================================================
+	public function getPhaseDoneJS() {
+		return $this->phaseDoneJS;
+	}
+
+	#====================================================================================================
+	# Magic method: __toString()
 	#====================================================================================================
 	public function __toString() {
 		return '<div id="'.$this->getID().'">'.((!BigPipe::isEnabled()) ? $this->getHTML() : NULL).'</div>';

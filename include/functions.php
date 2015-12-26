@@ -1,6 +1,6 @@
 <?php
 #====================================================================================================
-# FUNCTION: Entfernt alle Zeilenumbrüche und Tabulatoren aus einem String
+# FUNCTION: Removes all line breaks and tabs from a string or an array with strings
 #====================================================================================================
 function removeLineBreaksAndTabs($mixed, $replace = NULL) {
 	if(is_array($mixed)) {

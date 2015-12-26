@@ -2,53 +2,65 @@
 namespace BigPipe;
 
 class BigPipe {
-	public  static $enabled  = TRUE;
+	private static $enabled  = TRUE;
+	private static $debug    = TRUE;
 	private static $pagelets = [];
 	private static $count    = 0;
 
 	#====================================================================================================
-	# Gibt TRUE zurück wenn BigPipe eingeschaltet ist
+	# Return TRUE if the pipeline is enabled
 	#====================================================================================================
 	public static function isEnabled() {
-		return self::$enabled ? TRUE : FALSE;
+		return self::$enabled;
 	}
 
 	#====================================================================================================
-	# Neues Pagelet zur Pipeline hinzufügen
+	# Enable or disable the pipeline mode
+	#====================================================================================================
+	public static function enablePipeline($enabled = TRUE) {
+		return self::$enabled = (bool) $enabled;
+	}
+
+	#====================================================================================================
+	# Add a new pagelet to pipeline
 	#====================================================================================================
 	public static function addPagelet(Pagelet $Pagelet, $priority) {
 		self::$pagelets[$priority][] = $Pagelet;
-		self::$count++;
+		return ++self::$count;
 	}
 
 	#====================================================================================================
-	# Gibt einen einzelnen Pagelet-Response aus
+	# Prints a single pagelet response
 	#====================================================================================================
-	private static function pageletResponse(Pagelet $Pagelet, $async = FALSE, $last = FALSE) {
+	private static function singleResponse(Pagelet $Pagelet, $last = FALSE) {
 		$data = [
 			'ID' => $Pagelet->getID(),
-			'RESOURCES' => ['CSS' => $Pagelet->getCSSFiles(), 'JS' => $Pagelet->getJSFiles(), 'JS_CODE' => removeLineBreaksAndTabs($Pagelet->getJSCode())]
+			'RESOURCES' => ['CSS' => $Pagelet->getCSSFiles(), 'JS' => $Pagelet->getJSFiles(), 'JS_CODE' => removeLineBreaksAndTabs($Pagelet->getJSCode())],
+			'PHASES' => (object) $Pagelet->getPhaseDoneJS(),
 		];
 
 		if($last) {
 			$data['IS_LAST'] = true;
 		}
 
-		echo '<code class="hidden" id="_'.$data['ID'].'"><!-- '.str_replace('--', '&#45;&#45;', removeLineBreaksAndTabs($Pagelet->getHTML())).' --></code>'."\n";
-		echo '<script>BigPipe.onPageletArrive('.json_encode($data).($async ? ', document.getElementById("_'.$Pagelet->getID().'").innerHTML' : NULL).');</script>'."\n\n";
+		$pageletHTML = str_replace('--', '&#45;&#45;', removeLineBreaksAndTabs($Pagelet->getHTML()));
+		$pageletJSON = json_encode($data, (self::$debug ? JSON_PRETTY_PRINT : FALSE));
+
+		echo "<code class=\"hidden\" id=\"_{$Pagelet->getID()}\"><!-- {$pageletHTML} --></code>\n";
+		echo "<script>BigPipe.onPageletArrive({$pageletJSON});</script>\n\n";
 	}
 
 	#====================================================================================================
-	# Sendet den Output-Buffer so weit wie möglich in Richtung User
+	# Sends output buffer so far as possible towards user
 	#====================================================================================================
 	public static function flushOutputBuffer() {
 		ob_flush(); flush();
 	}
 
 	#====================================================================================================
-	# Alle Pagelets an Client schicken
+	# Render the pagelets
 	#====================================================================================================
-	public static function render($async = FALSE) {
+	public static function render() {
 		self::flushOutputBuffer();
 
 		$i = 0;
@@ -72,8 +84,10 @@ class BigPipe {
 				}
 
 				else {
-					self::pageletResponse($Pagelet, $async, (self::$count === ++$i));
+					self::singleResponse($Pagelet, (self::$count === ++$i));
 					self::flushOutputBuffer();
+
+					self::$debug AND usleep((rand(250, 1000) * 1000));
 				}
 			}
 		}

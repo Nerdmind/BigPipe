@@ -1,58 +1,55 @@
 //===================================================================================================
-// REVEALING MODLUE PATTERN: BigPipe
+// Revealing Module Pattern
 //===================================================================================================
 var BigPipe = (function() {
 	//===================================================================================================
-	// PROTOTYPE: PageletResource-Konstruktor
+	// Resource: Represents a single CSS or JS resource
 	//===================================================================================================
-	function PageletResource(file, type, pageletID) {
-		this.pageletID = pageletID;
+	function Resource(resourceURL, type) {
+		this.resourceURL = resourceURL;
 		this.callbacks = [];
 		this.done = false;
-		this.file = file;
 		this.type = type;
 	}
 
 	//===================================================================================================
-	// PROTOTYPE: Startet den Ladevorgang der Ressource
+	// Resource: Loading the resource
 	//===================================================================================================
-	PageletResource.prototype.start = function() {
+	Resource.prototype.start = function() {
 		if(this.type === 0) {
 			var element = document.createElement('link');
 			element.setAttribute('rel', 'stylesheet');
-			element.setAttribute('href', this.file);
+			element.setAttribute('href', this.resourceURL);
 		}
 
 		else {
 			var element = document.createElement('script');
-			element.setAttribute('src', this.file);
+			element.setAttribute('src', this.resourceURL);
 			element.async = true;
 		}
 
 		document.head.appendChild(element);
 
 		element.onload = function() {
-			BigPipe.executePhaseDoneCallbacks('RESOURCE_DONE', this);
 			this.executeCallbacks();
 		}.bind(this);
 
 		element.onerror = function() {
-			BigPipe.executePhaseDoneCallbacks('RESOURCE_DONE', this);
 			this.executeCallbacks();
 		}.bind(this);
 	};
 
 	//===================================================================================================
-	// PROTOTYPE: Registriert eine Callback-Funktion
+	// Resource: Register a new callback
 	//===================================================================================================
-	PageletResource.prototype.registerCallback = function(callback) {
+	Resource.prototype.registerCallback = function(callback) {
 		return this.callbacks.push(callback);
 	};
 
 	//===================================================================================================
-	// PROTOTYPE: Führt alle registrierten Callback-Funktionen aus
+	// Resource: Executes all registered callbacks
 	//===================================================================================================
-	PageletResource.prototype.executeCallbacks = function() {
+	Resource.prototype.executeCallbacks = function() {
 		if(!this.done) {
 			this.done = true;
 
@@ -63,7 +60,7 @@ var BigPipe = (function() {
 	};
 
 	//===================================================================================================
-	// PROTOTYPE: Pagelet-Konstruktor
+	// Pagelet: Represents a single pagelet
 	//===================================================================================================
 	function Pagelet(data) {
 		this.pageletID = data.ID;
@@ -72,36 +69,62 @@ var BigPipe = (function() {
 		this.JSFiles   = data.RESOURCES.JS;
 		this.JSCode    = data.RESOURCES.JS_CODE;
 
-		this.phase = 0; // 1 => Laden von CSS-Ressourcen, 2 => CSS-Ressourcen geladen, 3 => HTML wurde injiziert, 4 => JS-Ressourcen geladen und JS-Code ausgeführt
+		this.phase = 0;
 		this.CSSResources = [];
 		this.JSResources  = [];
+
+		this.phaseDoneJS = data.PHASES;
 	}
 
 	//===================================================================================================
-	// PROTOTYPE: Startet die Initialisierung des Pagelets und startet die Pagelet-Ressourcen
+	// Pagelet: Increases phase and executes PhaseDoneJS
 	//===================================================================================================
-	Pagelet.prototype.start = function() {
-		BigPipe.executePhaseDoneCallbacks('PAGELET_STARTED', this);
-		this.CSSFiles.forEach(function(file) {
-			this.attachCSSResource(new PageletResource(file, 0, this.pageletID));
-		}.bind(this));
-
-		this.JSFiles.forEach(function(file) {
-			this.attachJSResource(new PageletResource(file, 1, this.pageletID));
-		}.bind(this));
-
-		this.CSSResources.forEach(function(resource) {
-			this.phase = 1;
-			resource.start();
-		}.bind(this));
-
-		if(this.phase === 0) {
-			this.injectHTML();
+	Pagelet.prototype.phaseDoneHandler = function(phase) {
+		for(var currentPhase = this.phase; currentPhase <= phase; ++currentPhase) {
+			this.executePhaseDoneJS(currentPhase);
 		}
+
+		return (this.phase = ++phase);
 	};
 
 	//===================================================================================================
-	// PROTOTYPE: Fügt eine CSS-Ressource hinzu
+	// Pagelet: Executes the callbacks of the specific phase
+	//===================================================================================================
+	Pagelet.prototype.executePhaseDoneJS = function(phase) {
+		this.phaseDoneJS[phase].forEach(function(code) {
+			try {
+				globalExecution(code);
+			} catch(e) {
+				console.error("PhaseDoneJS: " + e);
+			}
+		});
+	};
+
+	//===================================================================================================
+	// Pagelet: Initialize and start the CSS resources
+	//===================================================================================================
+	Pagelet.prototype.start = function() {
+		var isStarted = false;
+
+		this.CSSFiles.forEach(function(resourceURL) {
+			this.attachCSSResource(new Resource(resourceURL, 0));
+		}.bind(this));
+
+		this.JSFiles.forEach(function(resourceURL) {
+			this.attachJSResource(new Resource(resourceURL, 1));
+		}.bind(this));
+
+		this.CSSResources.forEach(function(resource) {
+			isStarted = true;
+			resource.start();
+		}.bind(this));
+
+		// If no CSS resource was started (= no external CSS resources exists), then begin to inject the HTML
+		!isStarted && this.injectHTML();
+	};
+
+	//===================================================================================================
+	// Pagelet: Attach a new CSS resource to the pagelet
 	//===================================================================================================
 	Pagelet.prototype.attachCSSResource = function(resource) {
 		resource.registerCallback(this.onloadCSS.bind(this));
@@ -109,7 +132,7 @@ var BigPipe = (function() {
 	};
 
 	//===================================================================================================
-	// PROTOTYPE: Fügt eine JS-Ressource hinzu
+	// Pagelet: Attach a new JS resource to the pagelet
 	//===================================================================================================
 	Pagelet.prototype.attachJSResource = function(resource) {
 		resource.registerCallback(this.onloadJS.bind(this));
@@ -117,76 +140,69 @@ var BigPipe = (function() {
 	};
 
 	//===================================================================================================
-	// PROTOTYPE: Führt den statischen JS-Code des Pagelets aus
+	// Pagelet: Executes the main JS code of the pagelet
 	//===================================================================================================
 	Pagelet.prototype.executeJSCode = function() {
 		try {
 			globalExecution(this.JSCode);
-			BigPipe.executePhaseDoneCallbacks('PAGELET_JS_EXECUTED', this);
 		} catch(e) {
-			console.error(this.pageletID + ":\t" + e);
+			console.error(this.pageletID + ": " + e);
 		}
 	};
 
 	//===================================================================================================
-	// PROTOTYPE: Pagelet-Methode
+	// Pagelet: Get each time called if a single JS resource has been loaded
 	//===================================================================================================
 	Pagelet.prototype.onloadJS = function() {
 		if(this.phase === 3 && this.JSResources.every(function(resource){
-			return resource.done;
-		})) {
+				return resource.done;
+			})) {
+			this.phaseDoneHandler(3);
 			this.executeJSCode();
-			this.phase = 4;
+			this.phaseDoneHandler(4);
 		}
 	};
 
 	//===================================================================================================
-	// PROTOTYPE: Pagelet-Methode
+	// Pagelet: Get each time called if a single CSS resource has been loaded
 	//===================================================================================================
 	Pagelet.prototype.onloadCSS = function() {
 		if(this.CSSResources.every(function(resource){
-			return resource.done;
-		})) {
+				return resource.done;
+			})) {
 			this.injectHTML();
 		}
 	};
 
 	//===================================================================================================
-	// PROTOTYPE: Injiziert den HTML-Code des Pagelets in den DOM
+	// Pagelet: Injects the HTML content into the DOM
 	//===================================================================================================
 	Pagelet.prototype.injectHTML = function() {
-		this.phase = 2;
-		if(placeholder = document.getElementById(this.pageletID)) {
-			if(this.HTML) {
-				placeholder.innerHTML = this.HTML;
-			}
+		this.phaseDoneHandler(1);
 
-			else {
-				var content = document.getElementById('_' + this.pageletID);
-				placeholder.innerHTML = content.innerHTML.substring(5, content.innerHTML.length - 4);
-				document.body.removeChild(content);
-			}
+		if(placeholder = document.getElementById(this.pageletID)) {
+			var pageletHTML = document.getElementById('_' + this.pageletID);
+			placeholder.innerHTML = pageletHTML.innerHTML.substring(5, pageletHTML.innerHTML.length - 4);
+			document.body.removeChild(pageletHTML);
 		}
 
-		this.phase = 3;
+		this.phaseDoneHandler(2);
 
-		BigPipe.executePhaseDoneCallbacks('PAGELET_HTML_RENDERED', this);
 		BigPipe.executeNextPagelet();
 
+		// Check if this was the last pagelet and then start loading of the external JS resources
 		if(BigPipe.phase === 2 && BigPipe.pagelets[BigPipe.pagelets.length - 1].pageletID === this.pageletID) {
-			BigPipe.executePhaseDoneCallbacks('BIGPIPE_PAGELETS_RENDERED');
 			BigPipe.loadJSResources();
 		}
 	};
 
 	//===================================================================================================
-	// BigPipe-Hauptobjekt
+	// BigPipe
 	//===================================================================================================
 	var BigPipe = {
 		pagelets:  [],
-		phase: 0, // 1 => Erstes Pagelet gestartet, 2 => Alle Pagelets angekommen, 3 => JS-Ressourcen geladen + JS-Code ausgeführt
+		phase: 0,
 		offset: 0,
-		phaseDoneCallbacks: {},
 
 		executeNextPagelet: function() {
 			if(this.pagelets[this.offset]) {
@@ -194,27 +210,15 @@ var BigPipe = (function() {
 			}
 
 			else if(this.phase < 2) {
-				setTimeout(this.executeNextPagelet.bind(this), 30);
-			}
-		},
-
-		registerPhaseDoneCallback: function(phase, callback) {
-			if(!this.phaseDoneCallbacks[phase]) {
-				this.phaseDoneCallbacks[phase] = [];
-			}
-			return this.phaseDoneCallbacks[phase].push(callback);
-		},
-
-		executePhaseDoneCallbacks: function(phase, param) {
-			if(this.phaseDoneCallbacks[phase]) {
-				this.phaseDoneCallbacks[phase].forEach(function(callback) {
-					callback(param);
-				});
+				setTimeout(this.executeNextPagelet.bind(this), 20);
 			}
 		},
 
 		onPageletArrive: function(data) {
-			if(this.pagelets.push(new Pagelet(data)) && this.phase === 0 && !data.IS_LAST) {
+			var pagelet = new Pagelet(data);
+			pagelet.phaseDoneHandler(0);
+
+			if(this.pagelets.push(pagelet) && this.phase === 0 && !data.IS_LAST) {
 				this.phase = 1;
 				this.executeNextPagelet();
 			}
@@ -260,12 +264,7 @@ var BigPipe = (function() {
 			BigPipe.onPageletArrive(data);
 		},
 
-		registerPhaseDoneCallback: function(phase, callback) {
-			BigPipe.registerPhaseDoneCallback(phase, callback);
-		},
-
 		reset: function() {
-			BigPipe.phaseDoneCallbacks = {};
 			BigPipe.pagelets = [];
 			BigPipe.offset = 0;
 			BigPipe.phase = 0;
