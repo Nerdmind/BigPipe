@@ -3,8 +3,8 @@ namespace BigPipe;
 
 class DemoPagelet extends Pagelet {
 
-	public function __construct($priority = Pagelet::PRIORITY_NORMAL) {
-		parent::__construct($priority);
+	public function __construct($customID = NULL, $priority = Pagelet::PRIORITY_NORMAL) {
+		parent::__construct($customID, $priority);
 
 		$message = '%s: PhaseDoneJS for phase %s';
 

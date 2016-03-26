@@ -32,7 +32,7 @@ $PageletRed->addJSCode("document.getElementById('red').innerHTML += ' [JS execut
 #====================================================================================================
 # Pagelet with blue background color
 #====================================================================================================
-$PageletBlue = new BigPipe\DemoPagelet(BigPipe\Pagelet::PRIORITY_HIGH);
+$PageletBlue = new BigPipe\DemoPagelet('customPageletID', BigPipe\Pagelet::PRIORITY_HIGH);
 $PageletBlue->addHTML('<section id="blue" class="text">I AM A PAGELET WITH BLUE BACKGROUND</section>');
 $PageletBlue->addCSS('static/blue.php');
 $PageletBlue->addJS('static/delayJS.php');

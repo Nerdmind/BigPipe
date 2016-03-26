@@ -28,9 +28,9 @@ class Pagelet {
 	const PHASE_LOADJS  = 3; # After all the JS resources have been loaded
 	const PHASE_EXECJS  = 4; # After the static JS code has been executed
 
-	public function __construct($priority = self::PRIORITY_NORMAL) {
+	public function __construct($customID = NULL, $priority = self::PRIORITY_NORMAL) {
 		$this->phaseDoneJS = array_pad([], 5, []);
-		$this->ID = 'P'.++self::$count;
+		$this->ID = is_string($customID) ? $customID : 'P'.++self::$count;
 
 		BigPipe::addPagelet($this, $priority);
 	}
