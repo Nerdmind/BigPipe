@@ -1,4 +1,15 @@
 <?php
+# >>> [Additional code for the async function]
+
+#===============================================================================
+# FUNCTION: Return TRUE if the request awaiting a async response
+#===============================================================================
+function isAsyncRequest() {
+	return isset($_GET['response']) AND $_GET['response'] === 'async';
+}
+
+# <<<
+
 #===============================================================================
 # Deactivate caching
 #===============================================================================
@@ -24,7 +35,7 @@ if(isset($_GET['bigpipe']) AND (int) $_GET['bigpipe'] === 0) {
 # Pagelet with red background color
 #===============================================================================
 $PageletRed = new BigPipe\DemoPagelet();
-$PageletRed->addHTML('<section id="red" class="text">I AM A PAGELET WITH RED BACKGROUND</section>');
+$PageletRed->addHTML('<section id="red" class="text">['.time().'] I AM A PAGELET WITH RED BACKGROUND</section>');
 $PageletRed->addCSS('static/red.php');
 $PageletRed->addJS('static/delayJS.php');
 $PageletRed->addJSCode("document.getElementById('red').innerHTML += ' [JS executed]';document.getElementById('red').style.borderRadius = '30px';");
@@ -33,7 +44,7 @@ $PageletRed->addJSCode("document.getElementById('red').innerHTML += ' [JS execut
 # Pagelet with blue background color
 #===============================================================================
 $PageletBlue = new BigPipe\DemoPagelet('customPageletID', BigPipe\Pagelet::PRIORITY_HIGH);
-$PageletBlue->addHTML('<section id="blue" class="text">I AM A PAGELET WITH BLUE BACKGROUND</section>');
+$PageletBlue->addHTML('<section id="blue" class="text">['.time().'] I AM A PAGELET WITH BLUE BACKGROUND</section>');
 $PageletBlue->addCSS('static/blue.php');
 $PageletBlue->addJS('static/delayJS.php');
 $PageletBlue->addJSCode("document.getElementById('blue').innerHTML += ' [JS executed]';document.getElementById('blue').style.borderRadius = '30px';");
@@ -42,13 +53,14 @@ $PageletBlue->addJSCode("document.getElementById('blue').innerHTML += ' [JS exec
 # Pagelet with green background color
 #===============================================================================
 $PageletGreen = new BigPipe\DemoPagelet();
-$PageletGreen->addHTML('<section id="green" class="text">I AM A PAGELET WITH GREEN BACKGROUND</section>');
+$PageletGreen->addHTML('<section id="green" class="text">['.time().'] I AM A PAGELET WITH GREEN BACKGROUND</section>');
 $PageletGreen->addCSS('static/green.php');
 $PageletGreen->addJS('static/delayJS.php');
 $PageletGreen->addJSCode("document.getElementById('green').innerHTML += ' [JS executed]';document.getElementById('green').style.borderRadius = '30px';");
 ?>
 <!DOCTYPE html>
 <html lang="de">
+<?php if(!isAsyncRequest()): ?>
 <head>
 	<meta charset="UTF-8" />
 	<meta name="robots" content="noindex, nofollow" />
@@ -65,25 +77,67 @@ $PageletGreen->addJSCode("document.getElementById('green').innerHTML += ' [JS ex
 	</script>
 	<script src="static/bigpipe.js"></script>
 	<title>BigPipe Demo</title>
+	<!-- >>> [Additional code for the async function] -->
+	<script>
+		var Application = {
+			placeholderHTML: function(HTML) {
+				document.getElementById('placeholder_container').innerHTML = HTML;
+			}
+		};
+
+		function fireAsyncRequest(href) {
+			console.info('ASYNC REQUEST FIRED!');
+			Application.placeholderHTML("");
+			BigPipe.reset();
+			var transport_frame;
+
+			if(transport_frame = document.getElementById('transport_frame')) {
+				document.body.removeChild(transport_frame);
+			}
+
+			var iframe = document.createElement('iframe');
+			iframe.setAttribute('id', 'transport_frame');
+			iframe.setAttribute('class', 'hidden');
+			iframe.setAttribute('src', href + '?response=async');
+
+			document.body.appendChild(iframe);
+
+			iframe.onload = function() {
+				document.body.removeChild(iframe);
+			}.bind(this);
+
+			return false;
+		}
+	</script>
+	<!-- <<< -->
 </head>
+<?php endif; ?>
 <body>
-<h1>BigPipe Demo</h1>
-<p>You see on this page 3 pagelets are getting rendered. Each pagelet has his own CSS and JS resources. The CSS resources change the background color of the pagelet (so you can see the effect when the CSS is loaded). The next step is to load the JS resources and they change the border-radius of the pagelet. After the loading of CSS and JS resources the static JS callback get executed. Additionally, the PhaseDoneJS callbacks performed for each pagelet phase. See the javascript console for more debug informations.</p>
-<p>PhaseDoneJS is a new feature of BigPipe which can execute JS callbacks for each pagelet phase. Each pagelet can have multiple PhaseDoneJS callbacks for each phase. The difference between a PhaseDoneJS callback and a static JS callback ("JS_CODE") is the following: The static JS callback always get executed (regardless of whether the pipeline is enabled or disabled) and can be a main part of the JS from the pagelet. But the PhaseDoneJS callbacks are only executed if the pipeline is enabled. They are suitable for application-specific stuff.</p>
+<?php if(!isAsyncRequest()): ?>
+<h1>BigPipe Async Demo</h1>
 
-<p><strong>Notice:</strong> BigPipe may support the features of the new <em>PHP 7</em> in the future and you may also benefit from the performance boost with <em>PHP 7</em>.</p>
+<p><a href="async.php" onclick="return fireAsyncRequest(this)">LOAD CONTENT VIA TRANSPORT FRAME</a> [Current Time: <?=time();?> – So you can see, that the page does not get completely reloaded]</p>
+<p><em>Look at the developer console of your browser to see the debug messages and how the async response from server looks.</em></p>
 
-<p><b>Check if output flushing works on your server:</b><br /><a href="output-flushing-test.php">output-flushing-test.php</a></p>
-
-<?php
-echo $PageletRed;
-echo $PageletBlue;
-echo $PageletGreen;
-?>
-
+<section id="placeholder_container">
+	<?php else: ob_start(); endif; ?>
+	<?php
+	echo $PageletRed;
+	echo $PageletBlue;
+	echo $PageletGreen;
+	?>
+	<?php if(!isAsyncRequest()):?>
+</section>
 <footer><strong>The footer of the page.</strong></footer>
 
-<?php
+<?php endif;
+if(isAsyncRequest()) {
+	$BUFFER = removeLineBreaksAndTabs(ob_get_clean());
+	echo '<script>["Application","BigPipe"].forEach(function(name){window[name] = parent[name];});</script>'."\n";
+	echo '<script>["BigPipe", "Application"].forEach(function(name){window[name] = parent[name];});</script>'."\n";
+	echo '<script>Application.placeholderHTML('.json_encode($BUFFER).');</script>'."\n\n";
+}
+
 BigPipe\BigPipe::render();
 ?>
 </body>

@@ -1,10 +1,10 @@
-//===================================================================================================
+//==============================================================================
 // Revealing Module Pattern
-//===================================================================================================
+//==============================================================================
 var BigPipe = (function() {
-	//===================================================================================================
+	//==============================================================================
 	// Resource: Represents a single CSS or JS resource
-	//===================================================================================================
+	//==============================================================================
 	function Resource(resourceURL, type) {
 		this.resourceURL = resourceURL;
 		this.callbacks = [];
@@ -12,9 +12,9 @@ var BigPipe = (function() {
 		this.type = type;
 	}
 
-	//===================================================================================================
+	//==============================================================================
 	// Resource: Loading the resource
-	//===================================================================================================
+	//==============================================================================
 	Resource.prototype.start = function() {
 		if(this.type === 0) {
 			var element = document.createElement('link');
@@ -39,16 +39,16 @@ var BigPipe = (function() {
 		}.bind(this);
 	};
 
-	//===================================================================================================
+	//==============================================================================
 	// Resource: Register a new callback
-	//===================================================================================================
+	//==============================================================================
 	Resource.prototype.registerCallback = function(callback) {
 		return this.callbacks.push(callback);
 	};
 
-	//===================================================================================================
+	//==============================================================================
 	// Resource: Executes all registered callbacks
-	//===================================================================================================
+	//==============================================================================
 	Resource.prototype.executeCallbacks = function() {
 		if(!this.done) {
 			this.done = true;
@@ -59,12 +59,12 @@ var BigPipe = (function() {
 		}
 	};
 
-	//===================================================================================================
+	//==============================================================================
 	// Pagelet: Represents a single pagelet
-	//===================================================================================================
-	function Pagelet(data) {
+	//==============================================================================
+	function Pagelet(data, HTML) {
 		this.pageletID = data.ID;
-		this.HTML      = data.HTML || "";
+		this.HTML      = HTML || "";
 		this.CSSFiles  = data.RESOURCES.CSS;
 		this.JSFiles   = data.RESOURCES.JS;
 		this.JSCode    = data.RESOURCES.JS_CODE;
@@ -76,9 +76,9 @@ var BigPipe = (function() {
 		this.phaseDoneJS = data.PHASES;
 	}
 
-	//===================================================================================================
+	//==============================================================================
 	// Pagelet: Increases phase and executes PhaseDoneJS
-	//===================================================================================================
+	//==============================================================================
 	Pagelet.prototype.phaseDoneHandler = function(phase) {
 		for(var currentPhase = this.phase; currentPhase <= phase; ++currentPhase) {
 			this.executePhaseDoneJS(currentPhase);
@@ -87,9 +87,9 @@ var BigPipe = (function() {
 		return (this.phase = ++phase);
 	};
 
-	//===================================================================================================
+	//==============================================================================
 	// Pagelet: Executes the callbacks of the specific phase
-	//===================================================================================================
+	//==============================================================================
 	Pagelet.prototype.executePhaseDoneJS = function(phase) {
 		this.phaseDoneJS[phase].forEach(function(code) {
 			try {
@@ -100,9 +100,9 @@ var BigPipe = (function() {
 		});
 	};
 
-	//===================================================================================================
+	//==============================================================================
 	// Pagelet: Initialize and start the CSS resources
-	//===================================================================================================
+	//==============================================================================
 	Pagelet.prototype.start = function() {
 		var isStarted = false;
 
@@ -123,25 +123,25 @@ var BigPipe = (function() {
 		!isStarted && this.injectHTML();
 	};
 
-	//===================================================================================================
+	//==============================================================================
 	// Pagelet: Attach a new CSS resource to the pagelet
-	//===================================================================================================
+	//==============================================================================
 	Pagelet.prototype.attachCSSResource = function(resource) {
 		resource.registerCallback(this.onloadCSS.bind(this));
 		return this.CSSResources.push(resource);
 	};
 
-	//===================================================================================================
+	//==============================================================================
 	// Pagelet: Attach a new JS resource to the pagelet
-	//===================================================================================================
+	//==============================================================================
 	Pagelet.prototype.attachJSResource = function(resource) {
 		resource.registerCallback(this.onloadJS.bind(this));
 		return this.JSResources.push(resource);
 	};
 
-	//===================================================================================================
+	//==============================================================================
 	// Pagelet: Executes the main JS code of the pagelet
-	//===================================================================================================
+	//==============================================================================
 	Pagelet.prototype.executeJSCode = function() {
 		try {
 			globalExecution(this.JSCode);
@@ -150,41 +150,37 @@ var BigPipe = (function() {
 		}
 	};
 
-	//===================================================================================================
+	//==============================================================================
 	// Pagelet: Get each time called if a single JS resource has been loaded
-	//===================================================================================================
+	//==============================================================================
 	Pagelet.prototype.onloadJS = function() {
 		if(this.phase === 3 && this.JSResources.every(function(resource){
-				return resource.done;
-			})) {
+			return resource.done;
+		})) {
 			this.phaseDoneHandler(3);
 			this.executeJSCode();
 			this.phaseDoneHandler(4);
 		}
 	};
 
-	//===================================================================================================
+	//==============================================================================
 	// Pagelet: Get each time called if a single CSS resource has been loaded
-	//===================================================================================================
+	//==============================================================================
 	Pagelet.prototype.onloadCSS = function() {
 		if(this.CSSResources.every(function(resource){
-				return resource.done;
-			})) {
+			return resource.done;
+		})) {
 			this.injectHTML();
 		}
 	};
 
-	//===================================================================================================
+	//==============================================================================
 	// Pagelet: Injects the HTML content into the DOM
-	//===================================================================================================
+	//==============================================================================
 	Pagelet.prototype.injectHTML = function() {
 		this.phaseDoneHandler(1);
 
-		if(placeholder = document.getElementById(this.pageletID)) {
-			var pageletHTML = document.getElementById('_' + this.pageletID);
-			placeholder.innerHTML = pageletHTML.innerHTML.substring(5, pageletHTML.innerHTML.length - 4);
-			document.body.removeChild(pageletHTML);
-		}
+		document.getElementById(this.pageletID).innerHTML = this.HTML;
 
 		this.phaseDoneHandler(2);
 
@@ -196,9 +192,9 @@ var BigPipe = (function() {
 		}
 	};
 
-	//===================================================================================================
+	//==============================================================================
 	// BigPipe
-	//===================================================================================================
+	//==============================================================================
 	var BigPipe = {
 		pagelets:  [],
 		phase: 0,
@@ -214,8 +210,12 @@ var BigPipe = (function() {
 			}
 		},
 
-		onPageletArrive: function(data) {
-			var pagelet = new Pagelet(data);
+		onPageletArrive: function(data, codeContainer) {
+			var pageletHTML = codeContainer.innerHTML;
+			pageletHTML = pageletHTML.substring(5, pageletHTML.length - 4);
+			codeContainer.parentNode.removeChild(codeContainer);
+
+			var pagelet = new Pagelet(data, pageletHTML);
 			pagelet.phaseDoneHandler(0);
 
 			if(this.pagelets.push(pagelet) && this.phase === 0 && !data.IS_LAST) {
@@ -256,12 +256,12 @@ var BigPipe = (function() {
 		}
 	};
 
-	//===================================================================================================
+	//==============================================================================
 	// Public-Access
-	//===================================================================================================
+	//==============================================================================
 	return {
-		onPageletArrive: function(data) {
-			BigPipe.onPageletArrive(data);
+		onPageletArrive: function(data, codeContainer) {
+			BigPipe.onPageletArrive(data, codeContainer);
 		},
 
 		reset: function() {
