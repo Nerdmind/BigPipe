@@ -11,7 +11,7 @@ class Pagelet {
 	private static $count = 0;
 
 	#===============================================================================
-	# Priorities for sorting the pagelets
+	# Priorities for pagelet sorting
 	#===============================================================================
 	const PRIORITY_HIGHEST = 100;
 	const PRIORITY_HIGH    = 75;
