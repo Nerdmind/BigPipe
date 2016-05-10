@@ -70,16 +70,16 @@ class BigPipe {
 		foreach(array_reverse(self::$pagelets) as $priority => $pagelets) {
 			foreach($pagelets as $Pagelet) {
 				if(!self::isEnabled()) {
-					if($Pagelet->getJSCode()) {
-						echo '<script>'.$Pagelet->getJSCode().'</script>'."\n";
-					}
-
 					foreach($Pagelet->getCSSFiles() as $CSSFile) {
 						echo '<link href="'.$CSSFile.'" rel="stylesheet" />'."\n";
 					}
 
 					foreach($Pagelet->getJSFiles() as $JSFile) {
 						echo '<script src="'.$JSFile.'"></script>'."\n";
+					}
+
+					if($Pagelet->getJSCode()) {
+						echo '<script>'.$Pagelet->getJSCode().'</script>'."\n";
 					}
 				}
 
