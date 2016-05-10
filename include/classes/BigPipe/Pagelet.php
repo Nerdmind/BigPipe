@@ -20,7 +20,7 @@ class Pagelet {
 	const PRIORITY_LOWEST  = 0;
 
 	#===============================================================================
-	# Callback phase numbers for PhaseDoneJS
+	# Phase numbers for PhaseDoneJS
 	#===============================================================================
 	const PHASE_ARRIVE  = 0; # After the pagelet reached BigPipe
 	const PHASE_LOADCSS = 1; # After all the CSS resources have been loaded
