@@ -3,8 +3,8 @@ namespace BigPipe;
 
 class Pagelet {
 	private $ID           = NULL;
-	private $HTML         = "";
-	private $JSCode       = "";
+	private $HTML         = '';
+	private $JSCode       = '';
 	private $JSFiles      = [];
 	private $CSSFiles     = [];
 	private $phaseDoneJS  = [];
