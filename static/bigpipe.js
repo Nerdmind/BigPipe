@@ -28,6 +28,8 @@ var BigPipe = (function() {
 			element.async = true;
 		}
 
+		element.setAttribute('class', 'bigpipe');
+
 		document.head.appendChild(element);
 
 		element.onload = function() {
@@ -143,11 +145,13 @@ var BigPipe = (function() {
 	// Pagelet: Executes the main JS code of the pagelet
 	//==============================================================================
 	Pagelet.prototype.executeJSCode = function() {
-		try {
-			globalExecution(this.JSCode);
-		} catch(e) {
-			console.error(this.pageletID + ": " + e);
-		}
+		this.JSCode.forEach(function(code) {
+			try {
+				globalExecution(code);
+			} catch(e) {
+				console.error(this.pageletID + ": " + e);
+			}
+		});
 	};
 
 	//==============================================================================
@@ -268,6 +272,12 @@ var BigPipe = (function() {
 			BigPipe.pagelets = [];
 			BigPipe.offset = 0;
 			BigPipe.phase = 0;
+
+			var resources = document.head.getElementsByClassName('bigpipe');
+
+			while(resources[0]) {
+				resources[0].parentNode.removeChild(resources[0]);
+			}
 		}
 	};
 })();

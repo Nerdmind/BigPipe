@@ -4,10 +4,11 @@ namespace BigPipe;
 class Pagelet {
 	private $ID           = NULL;
 	private $HTML         = '';
-	private $JSCode       = '';
+	private $JSCode       = [];
 	private $JSFiles      = [];
 	private $CSSFiles     = [];
 	private $phaseDoneJS  = [];
+	private $tagname      = 'div';
 	private static $count = 0;
 
 	#===============================================================================
@@ -29,7 +30,7 @@ class Pagelet {
 	const PHASE_EXECJS  = 4; # After the static JS code has been executed
 
 	public function __construct($customID = NULL, $priority = self::PRIORITY_NORMAL) {
-		$this->phaseDoneJS = array_pad([], 5, []);
+		$this->phaseDoneJS = array_pad($this->phaseDoneJS, 5, []);
 		$this->ID = is_string($customID) ? $customID : 'P'.++self::$count;
 
 		BigPipe::addPagelet($this, $priority);
@@ -80,22 +81,22 @@ class Pagelet {
 	#===============================================================================
 	# Attach a CSS resource
 	#===============================================================================
-	public function addCSS($file) {
-		return $this->CSSFiles[] = $file;
+	public function addCSS($href) {
+		return $this->CSSFiles[] = $href;
 	}
 
 	#===============================================================================
 	# Attach a JS resource
 	#===============================================================================
-	public function addJS($file) {
-		return $this->JSFiles[] = $file;
+	public function addJS($href) {
+		return $this->JSFiles[] = $href;
 	}
 
 	#===============================================================================
-	# Add JS code or attach more
+	# Attach a main JS code part
 	#===============================================================================
 	public function addJSCode($code) {
-		return $this->JSCode .= $code;
+		return $this->JSCode[] = $code;
 	}
 
 	#===============================================================================
@@ -113,9 +114,20 @@ class Pagelet {
 	}
 
 	#===============================================================================
+	# Set custom placeholder tagname
+	#===============================================================================
+	public function setTagname($tagname) {
+		return $this->tagname = $tagname;
+	}
+
+	#===============================================================================
 	# Magic method: __toString()
 	#===============================================================================
 	public function __toString() {
-		return '<div id="'.$this->getID().'">'.((!BigPipe::isEnabled()) ? $this->getHTML() : NULL).'</div>';
+		$pageletHTML  = "<{$this->tagname} id=\"{$this->getID()}\">";
+		$pageletHTML .= !BigPipe::isEnabled() ? $this->getHTML() : NULL;
+		$pageletHTML .= "</{$this->tagname}>";
+
+		return $pageletHTML;
 	}
 }

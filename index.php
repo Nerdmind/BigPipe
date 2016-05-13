@@ -26,7 +26,7 @@ if(isset($_GET['bigpipe']) AND (int) $_GET['bigpipe'] === 0) {
 $PageletRed = new BigPipe\DemoPagelet();
 $PageletRed->addHTML('<section id="red" class="text">I AM A PAGELET WITH RED BACKGROUND</section>');
 $PageletRed->addCSS('static/red.php');
-$PageletRed->addJS('static/delayJS.php');
+$PageletRed->addJS('static/delayJS.php?red');
 $PageletRed->addJSCode("document.getElementById('red').innerHTML += ' [JS executed]';document.getElementById('red').style.borderRadius = '30px';");
 
 #===============================================================================
@@ -35,7 +35,7 @@ $PageletRed->addJSCode("document.getElementById('red').innerHTML += ' [JS execut
 $PageletBlue = new BigPipe\DemoPagelet('customPageletID', BigPipe\Pagelet::PRIORITY_HIGH);
 $PageletBlue->addHTML('<section id="blue" class="text">I AM A PAGELET WITH BLUE BACKGROUND</section>');
 $PageletBlue->addCSS('static/blue.php');
-$PageletBlue->addJS('static/delayJS.php');
+$PageletBlue->addJS('static/delayJS.php?blue');
 $PageletBlue->addJSCode("document.getElementById('blue').innerHTML += ' [JS executed]';document.getElementById('blue').style.borderRadius = '30px';");
 
 #===============================================================================
@@ -44,7 +44,7 @@ $PageletBlue->addJSCode("document.getElementById('blue').innerHTML += ' [JS exec
 $PageletGreen = new BigPipe\DemoPagelet();
 $PageletGreen->addHTML('<section id="green" class="text">I AM A PAGELET WITH GREEN BACKGROUND</section>');
 $PageletGreen->addCSS('static/green.php');
-$PageletGreen->addJS('static/delayJS.php');
+$PageletGreen->addJS('static/delayJS.php?green');
 $PageletGreen->addJSCode("document.getElementById('green').innerHTML += ' [JS executed]';document.getElementById('green').style.borderRadius = '30px';");
 ?>
 <!DOCTYPE html>
