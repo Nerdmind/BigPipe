@@ -8,6 +8,7 @@ class Pagelet {
 	private $JSFiles      = [];
 	private $CSSFiles     = [];
 	private $phaseDoneJS  = [];
+	private $dependencies = [];
 	private $tagname      = 'div';
 	private static $count = 0;
 
@@ -29,8 +30,9 @@ class Pagelet {
 	const PHASE_LOADJS  = 3; # After all the JS resources have been loaded
 	const PHASE_EXECJS  = 4; # After the static JS code has been executed
 
-	public function __construct($customID = NULL, $priority = self::PRIORITY_NORMAL) {
+	public function __construct($customID = NULL, $priority = self::PRIORITY_NORMAL, array $dependencies = []) {
 		$this->phaseDoneJS = array_pad($this->phaseDoneJS, 5, []);
+		$this->dependencies = $dependencies;
 		$this->ID = is_string($customID) ? $customID : 'P'.++self::$count;
 
 		BigPipe::addPagelet($this, $priority);
@@ -111,6 +113,13 @@ class Pagelet {
 	#===============================================================================
 	public function getPhaseDoneJS() {
 		return $this->phaseDoneJS;
+	}
+
+	#===============================================================================
+	# Return all display dependencies
+	#===============================================================================
+	public function getDependencies(): array {
+		return $this->dependencies;
 	}
 
 	#===============================================================================

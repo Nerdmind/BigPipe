@@ -34,7 +34,7 @@ class BigPipe {
 	#===============================================================================
 	private static function singleResponse(Pagelet $Pagelet, $last = FALSE) {
 		$pageletJSON = [
-			'ID' => $Pagelet->getID(),
+			'ID' => $Pagelet->getID(), 'NEED' => $Pagelet->getDependencies(),
 			'RESOURCES' => ['CSS' => $Pagelet->getCSSFiles(), 'JS' => $Pagelet->getJSFiles(), 'JS_CODE' => removeLineBreaksAndTabs($Pagelet->getJSCode())],
 			'PHASES' => (object) $Pagelet->getPhaseDoneJS()
 		];

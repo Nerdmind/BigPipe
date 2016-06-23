@@ -31,32 +31,8 @@ if(isset($_GET['bigpipe']) AND (int) $_GET['bigpipe'] === 0) {
 	BigPipe\BigPipe::enablePipeline(FALSE);
 }
 
-#===============================================================================
-# Pagelet with red background color
-#===============================================================================
-$PageletRed = new BigPipe\DemoPagelet();
-$PageletRed->addHTML('<section id="red" class="text">['.time().'] I AM A PAGELET WITH RED BACKGROUND</section>');
-$PageletRed->addCSS('static/red.php');
-$PageletRed->addJS('static/delayJS.php');
-$PageletRed->addJSCode("document.getElementById('red').innerHTML += ' [JS executed]';document.getElementById('red').style.borderRadius = '30px';");
-
-#===============================================================================
-# Pagelet with blue background color
-#===============================================================================
-$PageletBlue = new BigPipe\DemoPagelet('customPageletID', BigPipe\Pagelet::PRIORITY_HIGH);
-$PageletBlue->addHTML('<section id="blue" class="text">['.time().'] I AM A PAGELET WITH BLUE BACKGROUND</section>');
-$PageletBlue->addCSS('static/blue.php');
-$PageletBlue->addJS('static/delayJS.php');
-$PageletBlue->addJSCode("document.getElementById('blue').innerHTML += ' [JS executed]';document.getElementById('blue').style.borderRadius = '30px';");
-
-#===============================================================================
-# Pagelet with green background color
-#===============================================================================
-$PageletGreen = new BigPipe\DemoPagelet();
-$PageletGreen->addHTML('<section id="green" class="text">['.time().'] I AM A PAGELET WITH GREEN BACKGROUND</section>');
-$PageletGreen->addCSS('static/green.php');
-$PageletGreen->addJS('static/delayJS.php');
-$PageletGreen->addJSCode("document.getElementById('green').innerHTML += ' [JS executed]';document.getElementById('green').style.borderRadius = '30px';");
+// Outsourced to avoid duplicate code in index.php and async.php
+require_once 'include/pagelets.php';
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -134,7 +110,6 @@ $PageletGreen->addJSCode("document.getElementById('green').innerHTML += ' [JS ex
 if(isAsyncRequest()) {
 	$BUFFER = removeLineBreaksAndTabs(ob_get_clean());
 	echo '<script>["Application","BigPipe"].forEach(function(name){window[name] = parent[name];});</script>'."\n";
-	echo '<script>["BigPipe", "Application"].forEach(function(name){window[name] = parent[name];});</script>'."\n";
 	echo '<script>Application.placeholderHTML('.json_encode($BUFFER).');</script>'."\n\n";
 }
 

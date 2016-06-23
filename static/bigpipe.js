@@ -8,38 +8,10 @@ var BigPipe = (function() {
 	function Resource(resourceURL, type) {
 		this.resourceURL = resourceURL;
 		this.callbacks = [];
+		this.node = false;
 		this.done = false;
 		this.type = type;
 	}
-
-	//==============================================================================
-	// Resource: Loading the resource
-	//==============================================================================
-	Resource.prototype.start = function() {
-		if(this.type === 0) {
-			var element = document.createElement('link');
-			element.setAttribute('rel', 'stylesheet');
-			element.setAttribute('href', this.resourceURL);
-		}
-
-		else {
-			var element = document.createElement('script');
-			element.setAttribute('src', this.resourceURL);
-			element.async = true;
-		}
-
-		element.setAttribute('class', 'bigpipe');
-
-		document.head.appendChild(element);
-
-		element.onload = function() {
-			this.executeCallbacks();
-		}.bind(this);
-
-		element.onerror = function() {
-			this.executeCallbacks();
-		}.bind(this);
-	};
 
 	//==============================================================================
 	// Resource: Register a new callback
@@ -62,20 +34,66 @@ var BigPipe = (function() {
 	};
 
 	//==============================================================================
+	// Resource: Loading the resource
+	//==============================================================================
+	Resource.prototype.execute = function() {
+		if(this.type === 0) {
+			this.node = document.createElement('link');
+			this.node.setAttribute('rel', 'stylesheet');
+			this.node.setAttribute('href', this.resourceURL);
+		}
+
+		else {
+			this.node = document.createElement('script');
+			this.node.setAttribute('src', this.resourceURL);
+			this.node.async = true;
+		}
+
+		this.node.setAttribute('class', 'bigpipe');
+
+		document.head.appendChild(this.node);
+
+		this.node.onload = function() {
+			this.executeCallbacks();
+		}.bind(this);
+
+		this.node.onerror = function() {
+			this.executeCallbacks();
+		}.bind(this);
+	};
+
+	//==============================================================================
+	// Resource: Remove callbacks after abort of loading the resource
+	//==============================================================================
+	Resource.prototype.abortLoading = function() {
+		if(this.node) {
+			this.node.onload  = function(){};
+			this.node.onerror = function(){};
+
+			// Remove element from DOM
+			var parentNode = this.node.parentNode;
+			return parentNode.removeChild(this.node);
+		}
+	};
+
+	//==============================================================================
 	// Pagelet: Represents a single pagelet
 	//==============================================================================
 	function Pagelet(data, HTML) {
 		this.pageletID = data.ID;
-		this.HTML      = HTML || "";
+		this.HTML      = HTML;
 		this.CSSFiles  = data.RESOURCES.CSS;
 		this.JSFiles   = data.RESOURCES.JS;
 		this.JSCode    = data.RESOURCES.JS_CODE;
+		this.NEED      = data.NEED;
 
 		this.phase = 0;
 		this.CSSResources = [];
 		this.JSResources  = [];
 
 		this.phaseDoneJS = data.PHASES;
+
+		this.phaseDoneHandler(0);
 	}
 
 	//==============================================================================
@@ -103,9 +121,9 @@ var BigPipe = (function() {
 	};
 
 	//==============================================================================
-	// Pagelet: Initialize and start the CSS resources
+	// Pagelet: Initialize and execute the CSS resources
 	//==============================================================================
-	Pagelet.prototype.start = function() {
+	Pagelet.prototype.execute = function() {
 		var isStarted = false;
 
 		this.CSSFiles.forEach(function(resourceURL) {
@@ -118,11 +136,11 @@ var BigPipe = (function() {
 
 		this.CSSResources.forEach(function(resource) {
 			isStarted = true;
-			resource.start();
+			resource.execute();
 		}.bind(this));
 
 		// If no CSS resource was started (= no external CSS resources exists), then begin to inject the HTML
-		!isStarted && this.injectHTML();
+		!isStarted && this.replaceHTML();
 	};
 
 	//==============================================================================
@@ -152,6 +170,7 @@ var BigPipe = (function() {
 				console.error(this.pageletID + ": " + e);
 			}
 		});
+		this.phaseDoneHandler(4);
 	};
 
 	//==============================================================================
@@ -159,11 +178,10 @@ var BigPipe = (function() {
 	//==============================================================================
 	Pagelet.prototype.onloadJS = function() {
 		if(this.phase === 3 && this.JSResources.every(function(resource){
-			return resource.done;
-		})) {
+				return resource.done;
+			})) {
 			this.phaseDoneHandler(3);
 			this.executeJSCode();
-			this.phaseDoneHandler(4);
 		}
 	};
 
@@ -172,28 +190,22 @@ var BigPipe = (function() {
 	//==============================================================================
 	Pagelet.prototype.onloadCSS = function() {
 		if(this.CSSResources.every(function(resource){
-			return resource.done;
-		})) {
-			this.injectHTML();
+				return resource.done;
+			})) {
+			this.phaseDoneHandler(1);
+			this.replaceHTML();
 		}
 	};
 
 	//==============================================================================
 	// Pagelet: Injects the HTML content into the DOM
 	//==============================================================================
-	Pagelet.prototype.injectHTML = function() {
-		this.phaseDoneHandler(1);
-
+	Pagelet.prototype.replaceHTML = function() {
 		document.getElementById(this.pageletID).innerHTML = this.HTML;
 
 		this.phaseDoneHandler(2);
 
-		BigPipe.executeNextPagelet();
-
-		// Check if this was the last pagelet and then start loading of the external JS resources
-		if(BigPipe.phase === 2 && BigPipe.pagelets[BigPipe.pagelets.length - 1].pageletID === this.pageletID) {
-			BigPipe.loadJSResources();
-		}
+		BigPipe.pageletHTMLreplaced(this.pageletID);
 	};
 
 	//==============================================================================
@@ -202,17 +214,8 @@ var BigPipe = (function() {
 	var BigPipe = {
 		pagelets:  [],
 		phase: 0,
-		offset: 0,
-
-		executeNextPagelet: function() {
-			if(this.pagelets[this.offset]) {
-				this.pagelets[this.offset++].start();
-			}
-
-			else if(this.phase < 2) {
-				setTimeout(this.executeNextPagelet.bind(this), 20);
-			}
-		},
+		done: [],
+		wait: [],
 
 		onPageletArrive: function(data, codeContainer) {
 			var pageletHTML = codeContainer.innerHTML;
@@ -220,43 +223,64 @@ var BigPipe = (function() {
 			codeContainer.parentNode.removeChild(codeContainer);
 
 			var pagelet = new Pagelet(data, pageletHTML);
-			pagelet.phaseDoneHandler(0);
 
-			if(this.pagelets.push(pagelet) && this.phase === 0 && !data.IS_LAST) {
+			this.pagelets.push(pagelet);
+
+			if(this.phase = 0) {
 				this.phase = 1;
-				this.executeNextPagelet();
 			}
 
-			else if(data.IS_LAST) {
+			if(data.IS_LAST) {
 				this.phase = 2;
-				if(this.pagelets.length === 1) {
-					this.executeNextPagelet();
-				}
+			}
+
+			if(pagelet.NEED.length === 0 || pagelet.NEED.every(function(needID) {
+					return BigPipe.done.indexOf(needID) !== -1;
+				})) {
+				pagelet.execute();
+			}
+
+			else {
+				this.wait.push(pagelet);
 			}
 		},
 
-		loadJSResources: function() {
-			this.phase = 3;
-			var isLoading = false;
+		pageletHTMLreplaced: function(pageletID) {
+			BigPipe.done.push(pageletID);
 
-			this.pagelets.forEach(function(Pagelet) {
-				if(Pagelet.JSResources.length === 0) {
-					Pagelet.onloadJS();
+			for(var i = 0; i < this.wait.length; ++i) {
+				var pagelet = this.wait[i];
+
+				// Check if all IDs from NEED exists within BigPipe.done
+				// If this is true, then all required dependencies are satisfied.
+				if(pagelet.NEED.every(function(needID){
+						return BigPipe.done.indexOf(needID) !== -1;
+					})) {
+					BigPipe.wait.splice(i--, 1); // remove THIS pagelet from wait list
+					pagelet.execute();
+				}
+			}
+
+			// Check if this was the last pagelet and then execute loading of the external JS resources
+			if(BigPipe.phase === 2 && BigPipe.done.length === BigPipe.pagelets.length ) {
+				BigPipe.executeJSResources();
+			}
+		},
+
+		executeJSResources: function() {
+			this.phase = 3;
+
+			this.pagelets.forEach(function(pagelet) {
+				if(pagelet.JSResources.length === 0) {
+					pagelet.onloadJS();
+				}
+
+				else {
+					pagelet.JSResources.forEach(function(resource) {
+						resource.execute();
+					});
 				}
 			});
-
-			this.pagelets.forEach(function(Pagelet) {
-				Pagelet.JSResources.forEach(function(Resource) {
-					Resource.start();
-					isLoading = true;
-				});
-			});
-
-			if(!isLoading) {
-				this.pagelets.forEach(function(Pagelet) {
-					Pagelet.onloadJS();
-				});
-			}
 		}
 	};
 
@@ -269,15 +293,18 @@ var BigPipe = (function() {
 		},
 
 		reset: function() {
+			BigPipe.pagelets.forEach(function(pagelet) {
+				pagelet.CSSResources.concat(pagelet.JSResources).forEach(function(resource) {
+					resource.abortLoading();
+				});
+			});
+
+			window.stop() || document.execCommand("Stop");
+
 			BigPipe.pagelets = [];
-			BigPipe.offset = 0;
 			BigPipe.phase = 0;
-
-			var resources = document.head.getElementsByClassName('bigpipe');
-
-			while(resources[0]) {
-				resources[0].parentNode.removeChild(resources[0]);
-			}
+			BigPipe.wait = [];
+			BigPipe.done = [];
 		}
 	};
 })();
