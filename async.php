@@ -18,17 +18,22 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 #===============================================================================
 # Include classes and functions
 #===============================================================================
-require_once 'include/classes/BigPipe/BigPipe.php';
-require_once 'include/classes/BigPipe/Pagelet.php';
-require_once 'include/classes/BigPipe/DemoPagelet.php';
+spl_autoload_register(function($classname) {
+	$classpath = 'include/classes/%s.php';
+	$classname = str_replace('\\', '/', $classname);
+
+	require_once sprintf($classpath, $classname);
+});
+
 require_once 'include/functions.php';
 
 #===============================================================================
 # Check if BigPipe should be disabled
 #===============================================================================
-if(isset($_GET['bigpipe']) AND (int) $_GET['bigpipe'] === 0) {
-	// You can also check for search spiders and disable the pipeline
-	BigPipe\BigPipe::enablePipeline(FALSE);
+if(isset($_GET['bigpipe'])) {
+
+	# You can use this method also to disable pipeline for Googlebot or something.
+	BigPipe\BigPipe::enabled($_GET['bigpipe']);
 }
 
 // Outsourced to avoid duplicate code in index.php and async.php
@@ -56,13 +61,21 @@ require_once 'include/pagelets.php';
 	<!-- >>> [Additional code for the async function] -->
 	<script>
 		var Application = {
+			bigPipeEnabled: <?=json_encode(BigPipe\BigPipe::enabled())?>,
+
 			placeholderHTML: function(HTML) {
 				document.getElementById('placeholder_container').innerHTML = HTML;
 			}
 		};
 
 		function fireAsyncRequest(href) {
+			if(Application.bigPipeEnabled === false) {
+				alert("Note: Pipelining is disabled and page will be loaded quite normal.");
+				return;
+			}
+
 			console.info('ASYNC REQUEST FIRED!');
+
 			Application.placeholderHTML("");
 			BigPipe.reset();
 			var transport_frame;

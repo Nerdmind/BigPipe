@@ -2,16 +2,65 @@
 // Revealing Module Pattern
 //==============================================================================
 var BigPipe = (function() {
+
+	//==============================================================================
+	// PhaseDoneJS object; responsible for Pagelet and Resource
+	//==============================================================================
+	var PhaseDoneJS = {
+		//==============================================================================
+		// PhaseDoneJS: Increases phase and executes callbacks
+		//==============================================================================
+		handler: function(context, phase) {
+			for(var currentPhase = context.phase; currentPhase <= phase; ++currentPhase) {
+				this.execute(context, currentPhase);
+			}
+
+			return context.phase = ++phase;
+		},
+
+		//==============================================================================
+		// PhaseDoneJS: Executes the callbacks of the given phase
+		//==============================================================================
+		execute: function(context, phase) {
+			context.phaseDoneJS[phase].forEach(function(code) {
+				try {
+					globalExecution(code);
+				} catch(e) {
+					console.error("PhaseDoneJS: " + e);
+				}
+			});
+		}
+	};
+
 	//==============================================================================
 	// Resource: Represents a single CSS or JS resource
 	//==============================================================================
-	function Resource(resourceURL, type) {
+	function Resource(resourceURL, type, pageletID, phaseDoneJS) {
+		this.pageletID = pageletID;
 		this.resourceURL = resourceURL;
 		this.callbacks = [];
 		this.node = false;
 		this.done = false;
 		this.type = type;
+
+		this.phaseDoneJS = phaseDoneJS;
+		this.phase = 0;
+
+		PhaseDoneJS.handler(this, Resource.PHASE_INIT);
 	}
+
+	//==============================================================================
+	// Resource: Resource types
+	//==============================================================================
+	Resource.TYPE_STYLESHEET = 0;
+	Resource.TYPE_JAVASCRIPT = 1;
+
+	//==============================================================================
+	// Resource: Phase numbers for PhaseDoneJS
+	//==============================================================================
+	Resource.PHASE_INIT = 0;
+	Resource.PHASE_LOAD = 1;
+	Resource.PHASE_DONE = 2;
 
 	//==============================================================================
 	// Resource: Register a new callback
@@ -24,9 +73,7 @@ var BigPipe = (function() {
 	// Resource: Executes all registered callbacks
 	//==============================================================================
 	Resource.prototype.executeCallbacks = function() {
-		if(!this.done) {
-			this.done = true;
-
+		if(!this.done && (this.done = true)) {
 			this.callbacks.forEach(function(callback) {
 				callback();
 			});
@@ -37,29 +84,32 @@ var BigPipe = (function() {
 	// Resource: Loading the resource
 	//==============================================================================
 	Resource.prototype.execute = function() {
-		if(this.type === 0) {
-			this.node = document.createElement('link');
-			this.node.setAttribute('rel', 'stylesheet');
-			this.node.setAttribute('href', this.resourceURL);
+		switch(this.type) {
+			case Resource.TYPE_STYLESHEET:
+				this.node = document.createElement('link');
+				this.node.setAttribute('rel', 'stylesheet');
+				this.node.setAttribute('href', this.resourceURL);
+				break;
+			case Resource.TYPE_JAVASCRIPT:
+				this.node = document.createElement('script');
+				this.node.setAttribute('src', this.resourceURL);
+				this.node.setAttribute('async', true);
+				break;
+			default:
+				return false;
 		}
 
-		else {
-			this.node = document.createElement('script');
-			this.node.setAttribute('src', this.resourceURL);
-			this.node.async = true;
-		}
+		var callback = function() {
+			PhaseDoneJS.handler(this, Resource.PHASE_DONE);
+			this.executeCallbacks();
+		}.bind(this);
 
-		this.node.setAttribute('class', 'bigpipe');
+		this.node.onload  = callback;
+		this.node.onerror = callback;
 
 		document.head.appendChild(this.node);
 
-		this.node.onload = function() {
-			this.executeCallbacks();
-		}.bind(this);
-
-		this.node.onerror = function() {
-			this.executeCallbacks();
-		}.bind(this);
+		PhaseDoneJS.handler(this, Resource.PHASE_LOAD);
 	};
 
 	//==============================================================================
@@ -67,8 +117,8 @@ var BigPipe = (function() {
 	//==============================================================================
 	Resource.prototype.abortLoading = function() {
 		if(this.node) {
-			this.node.onload  = function(){};
-			this.node.onerror = function(){};
+			this.node.onload  = null;
+			this.node.onerror = null;
 
 			// Remove element from DOM
 			var parentNode = this.node.parentNode;
@@ -80,84 +130,88 @@ var BigPipe = (function() {
 	// Pagelet: Represents a single pagelet
 	//==============================================================================
 	function Pagelet(data, HTML) {
-		this.pageletID = data.ID;
-		this.HTML      = HTML;
-		this.CSSFiles  = data.RESOURCES.CSS;
-		this.JSFiles   = data.RESOURCES.JS;
-		this.JSCode    = data.RESOURCES.JS_CODE;
-		this.NEED      = data.NEED;
+		this.ID   = data.ID;
+		this.NEED = data.NEED;
+		this.HTML = HTML;
+		this.JSCode = data.CODE;
+		this.phaseDoneJS = data.PHASE;
+		this.stylesheets = data.RSRC[Resource.TYPE_STYLESHEET];
+		this.javascripts = data.RSRC[Resource.TYPE_JAVASCRIPT];
 
 		this.phase = 0;
-		this.CSSResources = [];
-		this.JSResources  = [];
+		this.resources = [[], []];
 
-		this.phaseDoneJS = data.PHASES;
-
-		this.phaseDoneHandler(0);
+		PhaseDoneJS.handler(this, Pagelet.PHASE_INIT);
 	}
 
 	//==============================================================================
-	// Pagelet: Increases phase and executes PhaseDoneJS
+	// Pagelet: Phase numbers for PhaseDoneJS
 	//==============================================================================
-	Pagelet.prototype.phaseDoneHandler = function(phase) {
-		for(var currentPhase = this.phase; currentPhase <= phase; ++currentPhase) {
-			this.executePhaseDoneJS(currentPhase);
+	Pagelet.PHASE_INIT    = 0;
+	Pagelet.PHASE_LOADCSS = 1;
+	Pagelet.PHASE_HTML    = 2;
+	Pagelet.PHASE_LOADJS  = 3;
+	Pagelet.PHASE_DONE    = 4;
+
+	//==============================================================================
+	// Pagelet: Initialize the pagelet resources
+	//==============================================================================
+	Pagelet.prototype.initializeResources = function() {
+		var resourceURL;
+		var phaseDoneJS;
+
+		for(resourceURL in this.stylesheets) {
+			phaseDoneJS = this.stylesheets[resourceURL];
+			this.attachResource(new Resource(resourceURL, Resource.TYPE_STYLESHEET, this.ID, phaseDoneJS));
 		}
 
-		return (this.phase = ++phase);
+		for(resourceURL in this.javascripts) {
+			phaseDoneJS = this.javascripts[resourceURL];
+			this.attachResource(new Resource(resourceURL, Resource.TYPE_JAVASCRIPT, this.ID, phaseDoneJS));
+		}
 	};
 
 	//==============================================================================
-	// Pagelet: Executes the callbacks of the specific phase
+	// Pagelet: Executes all resources of the specific type
 	//==============================================================================
-	Pagelet.prototype.executePhaseDoneJS = function(phase) {
-		this.phaseDoneJS[phase].forEach(function(code) {
-			try {
-				globalExecution(code);
-			} catch(e) {
-				console.error("PhaseDoneJS: " + e);
-			}
-		});
+	Pagelet.prototype.executeResources = function(type) {
+		var somethingExecuted = false;
+
+		this.resources[type].forEach(function(resource) {
+			somethingExecuted = true;
+			resource.execute();
+		}.bind(this));
+
+		return somethingExecuted;
 	};
 
 	//==============================================================================
 	// Pagelet: Initialize and execute the CSS resources
 	//==============================================================================
 	Pagelet.prototype.execute = function() {
-		var isStarted = false;
+		this.initializeResources();
 
-		this.CSSFiles.forEach(function(resourceURL) {
-			this.attachCSSResource(new Resource(resourceURL, 0));
-		}.bind(this));
-
-		this.JSFiles.forEach(function(resourceURL) {
-			this.attachJSResource(new Resource(resourceURL, 1));
-		}.bind(this));
-
-		this.CSSResources.forEach(function(resource) {
-			isStarted = true;
-			resource.execute();
-		}.bind(this));
-
-		// If no CSS resource was started (= no external CSS resources exists), then begin to inject the HTML
-		!isStarted && this.replaceHTML();
+		if(!this.executeResources(Resource.TYPE_STYLESHEET)) {
+			this.replaceHTML();
+		}
 	};
 
 	//==============================================================================
-	// Pagelet: Attach a new CSS resource to the pagelet
+	// Pagelet: Attach a new resource to the pagelet
 	//==============================================================================
-	Pagelet.prototype.attachCSSResource = function(resource) {
-		resource.registerCallback(this.onloadCSS.bind(this));
-		return this.CSSResources.push(resource);
-	};
+	Pagelet.prototype.attachResource = function(resource) {
+		switch(resource.type) {
+			case Resource.TYPE_STYLESHEET:
+				resource.registerCallback(this.onloadCSS.bind(this));
+				break;
 
-	//==============================================================================
-	// Pagelet: Attach a new JS resource to the pagelet
-	//==============================================================================
-	Pagelet.prototype.attachJSResource = function(resource) {
-		resource.registerCallback(this.onloadJS.bind(this));
-		return this.JSResources.push(resource);
-	};
+			case Resource.TYPE_JAVASCRIPT:
+				resource.registerCallback(this.onloadJS.bind(this));
+				break;
+		}
+
+		return this.resources[resource.type].push(resource);
+	}
 
 	//==============================================================================
 	// Pagelet: Executes the main JS code of the pagelet
@@ -167,20 +221,20 @@ var BigPipe = (function() {
 			try {
 				globalExecution(code);
 			} catch(e) {
-				console.error(this.pageletID + ": " + e);
+				console.error(this.ID + ": " + e);
 			}
 		});
-		this.phaseDoneHandler(4);
+		PhaseDoneJS.handler(this, Pagelet.PHASE_DONE);
 	};
 
 	//==============================================================================
 	// Pagelet: Get each time called if a single JS resource has been loaded
 	//==============================================================================
 	Pagelet.prototype.onloadJS = function() {
-		if(this.phase === 3 && this.JSResources.every(function(resource){
+		if(this.phase === 3 && this.resources[Resource.TYPE_JAVASCRIPT].every(function(resource){
 				return resource.done;
 			})) {
-			this.phaseDoneHandler(3);
+			PhaseDoneJS.handler(this, Pagelet.PHASE_LOADJS);
 			this.executeJSCode();
 		}
 	};
@@ -189,30 +243,30 @@ var BigPipe = (function() {
 	// Pagelet: Get each time called if a single CSS resource has been loaded
 	//==============================================================================
 	Pagelet.prototype.onloadCSS = function() {
-		if(this.CSSResources.every(function(resource){
+		if(this.resources[Resource.TYPE_STYLESHEET].every(function(resource){
 				return resource.done;
 			})) {
-			this.phaseDoneHandler(1);
+			PhaseDoneJS.handler(this, Pagelet.PHASE_LOADCSS);
 			this.replaceHTML();
 		}
 	};
 
 	//==============================================================================
-	// Pagelet: Injects the HTML content into the DOM
+	// Pagelet: Replaces the placeholder node HTML
 	//==============================================================================
 	Pagelet.prototype.replaceHTML = function() {
-		document.getElementById(this.pageletID).innerHTML = this.HTML;
+		document.getElementById(this.ID).innerHTML = this.HTML;
 
-		this.phaseDoneHandler(2);
+		PhaseDoneJS.handler(this, Pagelet.PHASE_HTML);
 
-		BigPipe.pageletHTMLreplaced(this.pageletID);
+		BigPipe.pageletHTMLreplaced(this.ID);
 	};
 
 	//==============================================================================
 	// BigPipe
 	//==============================================================================
 	var BigPipe = {
-		pagelets:  [],
+		pagelets: [],
 		phase: 0,
 		done: [],
 		wait: [],
@@ -226,7 +280,7 @@ var BigPipe = (function() {
 
 			this.pagelets.push(pagelet);
 
-			if(this.phase = 0) {
+			if(this.phase === 0) {
 				this.phase = 1;
 			}
 
@@ -262,7 +316,7 @@ var BigPipe = (function() {
 			}
 
 			// Check if this was the last pagelet and then execute loading of the external JS resources
-			if(BigPipe.phase === 2 && BigPipe.done.length === BigPipe.pagelets.length ) {
+			if(BigPipe.phase === 2 && BigPipe.done.length === BigPipe.pagelets.length) {
 				BigPipe.executeJSResources();
 			}
 		},
@@ -271,14 +325,8 @@ var BigPipe = (function() {
 			this.phase = 3;
 
 			this.pagelets.forEach(function(pagelet) {
-				if(pagelet.JSResources.length === 0) {
+				if(!pagelet.executeResources(Resource.TYPE_JAVASCRIPT)) {
 					pagelet.onloadJS();
-				}
-
-				else {
-					pagelet.JSResources.forEach(function(resource) {
-						resource.execute();
-					});
 				}
 			});
 		}
@@ -294,7 +342,11 @@ var BigPipe = (function() {
 
 		reset: function() {
 			BigPipe.pagelets.forEach(function(pagelet) {
-				pagelet.CSSResources.concat(pagelet.JSResources).forEach(function(resource) {
+				pagelet.resources[Resource.TYPE_STYLESHEET].forEach(function(resource) {
+					resource.abortLoading();
+				});
+
+				pagelet.resources[Resource.TYPE_JAVASCRIPT].forEach(function(resource) {
 					resource.abortLoading();
 				});
 			});

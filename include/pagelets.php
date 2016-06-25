@@ -1,8 +1,13 @@
 <?php
 #===============================================================================
+# Enable debugging mode
+#===============================================================================
+BigPipe\BigPipe::debugging(TRUE);
+
+#===============================================================================
 # Pagelet with red background color
 #===============================================================================
-$PageletRed = new BigPipe\DemoPagelet('redPL');
+$PageletRed = new BigPipe\Pagelet('redPL');
 $PageletRed->addHTML('<section id="red" class="text">I AM A PAGELET WITH RED BACKGROUND</section>');
 $PageletRed->addCSS('static/red.php');
 $PageletRed->addCSS('static/red.php');
@@ -12,7 +17,7 @@ $PageletRed->addJSCode("document.getElementById('red').innerHTML += ' [JS execut
 #===============================================================================
 # Pagelet with blue background color
 #===============================================================================
-$PageletBlue = new BigPipe\DemoPagelet('bluePL', BigPipe\Pagelet::PRIORITY_HIGH);
+$PageletBlue = new BigPipe\Pagelet('bluePL', BigPipe\Pagelet::PRIORITY_HIGH);
 $PageletBlue->addHTML('<section id="blue" class="text">I AM A PAGELET WITH BLUE BACKGROUND</section>');
 $PageletBlue->addCSS('static/blue.php');
 $PageletRed->addCSS('static/red.php');
@@ -22,7 +27,7 @@ $PageletBlue->addJSCode("document.getElementById('blue').innerHTML += ' [JS exec
 #===============================================================================
 # Pagelet with green background color
 #===============================================================================
-$PageletGreen = new BigPipe\DemoPagelet('greenPL');
+$PageletGreen = new BigPipe\Pagelet('greenPL');
 
 {
 	#===============================================================================
@@ -39,7 +44,7 @@ $PageletGreen = new BigPipe\DemoPagelet('greenPL');
 	// the first which arrives, but it will first be displayed if his dependency
 	// pagelets are already displayed.
 
-	$InnerPagelet = new BigPipe\DemoPagelet('innerPL', BigPipe\Pagelet::PRIORITY_HIGHEST, [$PageletGreen->getID()]);
+	$InnerPagelet = new BigPipe\Pagelet('innerPL', BigPipe\Pagelet::PRIORITY_HIGHEST, [$PageletGreen->getID()]);
 	$InnerPagelet->addHTML('<section sytle="background:#FFF;padding:5px;">Inner Pagelet \(o_o)/</section>');
 }
 

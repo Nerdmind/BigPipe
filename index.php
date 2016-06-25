@@ -7,9 +7,13 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 #===============================================================================
 # Include classes and functions
 #===============================================================================
-require_once 'include/classes/BigPipe/BigPipe.php';
-require_once 'include/classes/BigPipe/Pagelet.php';
-require_once 'include/classes/BigPipe/DemoPagelet.php';
+spl_autoload_register(function($classname) {
+	$classpath = 'include/classes/%s.php';
+	$classname = str_replace('\\', '/', $classname);
+
+	require_once sprintf($classpath, $classname);
+});
+
 require_once 'include/functions.php';
 
 #===============================================================================
@@ -44,8 +48,8 @@ require_once 'include/pagelets.php';
 </head>
 <body>
 <h1>BigPipe Demo</h1>
-<p>You see on this page 3 pagelets are getting rendered. Each pagelet has his own CSS and JS resources. The CSS resources change the background color of the pagelet (so you can see the effect when the CSS is loaded). The next step is to load the JS resources and they change the border-radius of the pagelet. After the loading of CSS and JS resources the static JS callback get executed. Additionally, the PhaseDoneJS callbacks performed for each pagelet phase. See the javascript console for more debug informations.</p>
-<p>PhaseDoneJS is a new feature of BigPipe which can execute JS callbacks for each pagelet phase. Each pagelet can have multiple PhaseDoneJS callbacks for each phase. The difference between a PhaseDoneJS callback and a static JS callback ("JS_CODE") is the following: The static JS callback always get executed (regardless of whether the pipeline is enabled or disabled) and can be a main part of the JS from the pagelet. But the PhaseDoneJS callbacks are only executed if the pipeline is enabled. They are suitable for application-specific stuff.</p>
+<p>You see on this page 3 pagelets are getting rendered. Each pagelet has his own CSS and JS resources. The CSS resources change the background color of the pagelet (so you can see the effect when the CSS is loaded). The next step is to replace the content on the placeholder HTML with the Pagelet HTML load the JS resources and they change the border-radius of the pagelet. After the loading of CSS and JS resources the static JS callback get executed. Additionally, the PhaseDoneJS callbacks performed for each pagelet phase. See the javascript console for more debug informations.</p>
+<p>PhaseDoneJS is a new feature of BigPipe which can execute JS callbacks for each pagelet phase. Each pagelet can have multiple PhaseDoneJS callbacks for each phase. The difference between a PhaseDoneJS callback and a static JS callback ("CODE") is the following: The static JS callback always get executed (regardless of whether the pipeline is enabled or disabled) and can be a main part of the JS from the pagelet. But the PhaseDoneJS callbacks are only executed if the pipeline is enabled. They are suitable for application-specific stuff.</p>
 
 <p><strong>Notice:</strong> BigPipe may support the features of the new <em>PHP 7</em> in the future and you may also benefit from the performance boost with <em>PHP 7</em>.</p>
 

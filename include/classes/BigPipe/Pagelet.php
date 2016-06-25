@@ -2,11 +2,11 @@
 namespace BigPipe;
 
 class Pagelet {
-	private $ID           = NULL;
+	private $ID           = '';
 	private $HTML         = '';
 	private $JSCode       = [];
-	private $JSFiles      = [];
-	private $CSSFiles     = [];
+	private $JSResources  = [];
+	private $CSSResources = [];
 	private $phaseDoneJS  = [];
 	private $dependencies = [];
 	private $tagname      = 'div';
@@ -24,11 +24,11 @@ class Pagelet {
 	#===============================================================================
 	# Phase numbers for PhaseDoneJS
 	#===============================================================================
-	const PHASE_ARRIVE  = 0; # After the pagelet reached BigPipe
+	const PHASE_INIT    = 0; # After the pagelet object was initialized
 	const PHASE_LOADCSS = 1; # After all the CSS resources have been loaded
-	const PHASE_PUTHTML = 2; # After the HTML content has been injected into the placeholders
+	const PHASE_HTML    = 2; # After the placeholder HTML was replaced
 	const PHASE_LOADJS  = 3; # After all the JS resources have been loaded
-	const PHASE_EXECJS  = 4; # After the static JS code has been executed
+	const PHASE_DONE    = 4; # After the static JS code has been executed
 
 	public function __construct($customID = NULL, $priority = self::PRIORITY_NORMAL, array $dependencies = []) {
 		$this->phaseDoneJS = array_pad($this->phaseDoneJS, 5, []);
@@ -53,20 +53,6 @@ class Pagelet {
 	}
 
 	#===============================================================================
-	# Return the CSS resources
-	#===============================================================================
-	public function getCSSFiles() {
-		return $this->CSSFiles;
-	}
-
-	#===============================================================================
-	# Return the JS resources
-	#===============================================================================
-	public function getJSFiles() {
-		return $this->JSFiles;
-	}
-
-	#===============================================================================
 	# Return the main JS code
 	#===============================================================================
 	public function getJSCode() {
@@ -81,17 +67,35 @@ class Pagelet {
 	}
 
 	#===============================================================================
-	# Attach a CSS resource
+	# Add resource
 	#===============================================================================
-	public function addCSS($href) {
-		return $this->CSSFiles[] = $href;
+	public function addResource(Resource $Resource): Resource {
+		switch($Resource->getType()) {
+			case Resource::TYPE_STYLESHEET:
+				return $this->CSSResources[] = $Resource;
+				break;
+
+			case Resource::TYPE_JAVASCRIPT:
+				return $this->JSResources[] = $Resource;
+				break;
+
+			default:
+				return $Resource;
+		}
 	}
 
 	#===============================================================================
-	# Attach a JS resource
+	# Short: Add CSS resource by URL
 	#===============================================================================
-	public function addJS($href) {
-		return $this->JSFiles[] = $href;
+	public function addCSS($resourceURL): Resource {
+		return $this->addResource(new Resource\CSS($resourceURL));
+	}
+
+	#===============================================================================
+	# Short: Add JS resource by URL
+	#===============================================================================
+	public function addJS($resourceURL): Resource {
+		return $this->addResource(new Resource\JS($resourceURL));
 	}
 
 	#===============================================================================
@@ -111,8 +115,22 @@ class Pagelet {
 	#===============================================================================
 	# Return all registered PhaseDoneJS callbacks
 	#===============================================================================
-	public function getPhaseDoneJS() {
+	public function getPhaseDoneJS(): array {
 		return $this->phaseDoneJS;
+	}
+
+	#===============================================================================
+	# Return the attached CSS resources
+	#===============================================================================
+	public function getCSSResources(): array {
+		return $this->CSSResources;
+	}
+
+	#===============================================================================
+	# Return the attached JS resources
+	#===============================================================================
+	public function getJSResources(): array {
+		return $this->JSResources;
 	}
 
 	#===============================================================================
@@ -134,7 +152,7 @@ class Pagelet {
 	#===============================================================================
 	public function __toString() {
 		$pageletHTML  = "<{$this->tagname} id=\"{$this->getID()}\">";
-		$pageletHTML .= !BigPipe::isEnabled() ? $this->getHTML() : NULL;
+		$pageletHTML .= !BigPipe::enabled() ? $this->getHTML() : NULL;
 		$pageletHTML .= "</{$this->tagname}>";
 
 		return $pageletHTML;
