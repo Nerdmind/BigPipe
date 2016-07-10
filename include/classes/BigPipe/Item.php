@@ -1,6 +1,6 @@
 <?php
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
-# Abstract item class                          [Thomas Lange <tl@nerdmind.de>] #
+# Abstract item class                        [Thomas Lange <code@nerdmind.de>] #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
 #                                                                              #
 # The item class abstracts the properties and methods that are required by the #

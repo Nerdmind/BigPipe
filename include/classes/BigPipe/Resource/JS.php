@@ -1,6 +1,6 @@
 <?php
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
-# Resource representation class [JS]           [Thomas Lange <tl@nerdmind.de>] #
+# Resource representation class [JS]         [Thomas Lange <code@nerdmind.de>] #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
 #                                                                              #
 # [More information coming soon]                                               #
