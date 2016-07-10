@@ -1,13 +1,17 @@
 <?php
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+# Pagelet representation class                 [Thomas Lange <tl@nerdmind.de>] #
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+#                                                                              #
+# [More information coming soon]                                               #
+#                                                                              #
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
 namespace BigPipe;
 
-class Pagelet {
-	private $ID           = '';
+class Pagelet extends Item {
 	private $HTML         = '';
 	private $JSCode       = [];
-	private $JSResources  = [];
-	private $CSSResources = [];
-	private $phaseDoneJS  = [];
+	private $resources    = [];
 	private $dependencies = [];
 	private $tagname      = 'div';
 	private static $count = 0;
@@ -31,18 +35,13 @@ class Pagelet {
 	const PHASE_DONE    = 4; # After the static JS code has been executed
 
 	public function __construct($customID = NULL, $priority = self::PRIORITY_NORMAL, array $dependencies = []) {
-		$this->phaseDoneJS = array_pad($this->phaseDoneJS, 5, []);
+		$this->ID = $customID ?? 'P'.++self::$count;
 		$this->dependencies = $dependencies;
-		$this->ID = is_string($customID) ? $customID : 'P'.++self::$count;
+
+		$this->resources   = array_pad($this->resources,   2, []);
+		$this->phaseDoneJS = array_pad($this->phaseDoneJS, 5, []);
 
 		BigPipe::addPagelet($this, $priority);
-	}
-
-	#===============================================================================
-	# Return the unique ID
-	#===============================================================================
-	public function getID() {
-		return $this->ID;
 	}
 
 	#===============================================================================
@@ -55,8 +54,22 @@ class Pagelet {
 	#===============================================================================
 	# Return the main JS code
 	#===============================================================================
-	public function getJSCode() {
+	public function getJSCode(): array {
 		return $this->JSCode;
+	}
+
+	#===============================================================================
+	# Return attached resources
+	#===============================================================================
+	public function getResources(): array {
+		return $this->resources;
+	}
+
+	#===============================================================================
+	# Return all display dependencies
+	#===============================================================================
+	public function getDependencies(): array {
+		return $this->dependencies;
 	}
 
 	#===============================================================================
@@ -70,32 +83,21 @@ class Pagelet {
 	# Add resource
 	#===============================================================================
 	public function addResource(Resource $Resource): Resource {
-		switch($Resource->getType()) {
-			case Resource::TYPE_STYLESHEET:
-				return $this->CSSResources[] = $Resource;
-				break;
-
-			case Resource::TYPE_JAVASCRIPT:
-				return $this->JSResources[] = $Resource;
-				break;
-
-			default:
-				return $Resource;
-		}
+		return $this->resources[$Resource->getType()][] = $Resource;
 	}
 
 	#===============================================================================
 	# Short: Add CSS resource by URL
 	#===============================================================================
 	public function addCSS($resourceURL): Resource {
-		return $this->addResource(new Resource\CSS($resourceURL));
+		return $this->addResource(new Resource\CSS(NULL, $resourceURL));
 	}
 
 	#===============================================================================
 	# Short: Add JS resource by URL
 	#===============================================================================
 	public function addJS($resourceURL): Resource {
-		return $this->addResource(new Resource\JS($resourceURL));
+		return $this->addResource(new Resource\JS(NULL, $resourceURL));
 	}
 
 	#===============================================================================
@@ -103,41 +105,6 @@ class Pagelet {
 	#===============================================================================
 	public function addJSCode($code) {
 		return $this->JSCode[] = $code;
-	}
-
-	#===============================================================================
-	# Attach a PhaseDoneJS callback
-	#===============================================================================
-	public function addPhaseDoneJS($phase, $callback) {
-		return $this->phaseDoneJS[$phase][] = removeLineBreaksAndTabs($callback);
-	}
-
-	#===============================================================================
-	# Return all registered PhaseDoneJS callbacks
-	#===============================================================================
-	public function getPhaseDoneJS(): array {
-		return $this->phaseDoneJS;
-	}
-
-	#===============================================================================
-	# Return the attached CSS resources
-	#===============================================================================
-	public function getCSSResources(): array {
-		return $this->CSSResources;
-	}
-
-	#===============================================================================
-	# Return the attached JS resources
-	#===============================================================================
-	public function getJSResources(): array {
-		return $this->JSResources;
-	}
-
-	#===============================================================================
-	# Return all display dependencies
-	#===============================================================================
-	public function getDependencies(): array {
-		return $this->dependencies;
 	}
 
 	#===============================================================================
@@ -158,3 +125,4 @@ class Pagelet {
 		return $pageletHTML;
 	}
 }
+?>

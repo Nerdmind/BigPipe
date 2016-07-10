@@ -1,4 +1,13 @@
 <?php
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+# BigPipe main class                           [Thomas Lange <tl@nerdmind.de>] #
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+#                                                                              #
+# The BigPipe main class is responsible for sorting and rendering the pagelets #
+# and their associated resources. This class also provides methods to turn off #
+# the pipelining mode or turn on the debugging mode.                           #
+#                                                                              #
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
 namespace BigPipe;
 
 class BigPipe {
@@ -44,8 +53,8 @@ class BigPipe {
 		if(self::debugging()) {
 			self::addDebugPhaseDoneJS($Pagelet);
 
-			array_map('self::addDebugPhaseDoneJS', $Pagelet->getCSSResources());
-			array_map('self::addDebugPhaseDoneJS', $Pagelet->getJSResources());
+			array_map('self::addDebugPhaseDoneJS', $Pagelet->getResources()[Resource::TYPE_STYLESHEET]);
+			array_map('self::addDebugPhaseDoneJS', $Pagelet->getResources()[Resource::TYPE_JAVASCRIPT]);
 
 			usleep(rand(125, 175) * 2000);
 		}
@@ -53,20 +62,20 @@ class BigPipe {
 		$stylesheets = [];
 		$javascripts = [];
 
-		foreach($Pagelet->getCSSResources() as $Resource) {
-			$stylesheets[$Resource->getURL()] = $Resource->getPhaseDoneJS();
+		foreach($Pagelet->getResources()[Resource::TYPE_STYLESHEET] as $Resource) {
+			$stylesheets[] = ['ID' => $Resource->getID(), 'HREF' => $Resource->getURL(), 'PHASE' => $Resource->getPhaseDoneJS()];
 		}
 
-		foreach($Pagelet->getJSResources() as $Resource) {
-			$javascripts[$Resource->getURL()] = $Resource->getPhaseDoneJS();
+		foreach($Pagelet->getResources()[Resource::TYPE_JAVASCRIPT] as $Resource) {
+			$javascripts[] = ['ID' => $Resource->getID(), 'HREF' => $Resource->getURL(), 'PHASE' => $Resource->getPhaseDoneJS()];
 		}
 
 		$pageletJSON = [
-			'ID' => $Pagelet->getID(),
+			'ID'   => $Pagelet->getID(),
 			'NEED' => $Pagelet->getDependencies(),
-			'RSRC' => (object) [
-				Resource::TYPE_STYLESHEET => (object) $stylesheets,
-				Resource::TYPE_JAVASCRIPT => (object) $javascripts,
+			'RSRC' => [
+				Resource::TYPE_STYLESHEET => $stylesheets,
+				Resource::TYPE_JAVASCRIPT => $javascripts,
 			],
 			'CODE' => removeLineBreaksAndTabs($Pagelet->getJSCode()),
 			'PHASE' => $Pagelet->getPhaseDoneJS()
@@ -105,11 +114,11 @@ class BigPipe {
 		foreach(array_reverse(self::$pagelets) as $priority => $pagelets) {
 			foreach($pagelets as $Pagelet) {
 				if(!self::enabled()) {
-					foreach($Pagelet->getCSSResources() as $Resource) {
+					foreach($Pagelet->getResources()[Resource::TYPE_STYLESHEET] as $Resource) {
 						echo $Resource->renderHTML()."\n";
 					}
 
-					foreach($Pagelet->getJSResources() as $Resource) {
+					foreach($Pagelet->getResources()[Resource::TYPE_JAVASCRIPT] as $Resource) {
 						echo $Resource->renderHTML()."\n";
 					}
 

@@ -1,11 +1,16 @@
 <?php
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+# Abstract Resource representation class       [Thomas Lange <tl@nerdmind.de>] #
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+#                                                                              #
+# [More information coming soon]                                               #
+#                                                                              #
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
 namespace BigPipe;
 
-abstract class Resource {
-	private $ID           = '';
+abstract class Resource extends Item {
 	private $type         = '';
 	private $resourceURL  = '';
-	private $phaseDoneJS  = [];
 	private static $count = 0;
 
 	#===============================================================================
@@ -29,18 +34,12 @@ abstract class Resource {
 	#===============================================================================
 	# Build resource
 	#===============================================================================
-	public function __construct($type, $resourceURL) {
-		$this->phaseDoneJS = array_pad($this->phaseDoneJS, 3, []);
-		$this->ID = 'R'.++self::$count;
+	public function __construct($customID = NULL, $type, $resourceURL) {
+		$this->ID = $customID ?? 'R'.++self::$count;
 		$this->type = $type;
 		$this->resourceURL = $resourceURL;
-	}
 
-	#===============================================================================
-	# Return the unique ID
-	#===============================================================================
-	public function getID() {
-		return $this->ID;
+		$this->phaseDoneJS = array_pad($this->phaseDoneJS, 3, []);
 	}
 
 	#===============================================================================
@@ -55,20 +54,6 @@ abstract class Resource {
 	#===============================================================================
 	public function getURL() {
 		return $this->resourceURL;
-	}
-
-	#===============================================================================
-	# Attach a PhaseDoneJS callback
-	#===============================================================================
-	public function addPhaseDoneJS($phase, $callback) {
-		return $this->phaseDoneJS[$phase][] = removeLineBreaksAndTabs($callback);
-	}
-
-	#===============================================================================
-	# Return all registered PhaseDoneJS callbacks
-	#===============================================================================
-	public function getPhaseDoneJS() {
-		return $this->phaseDoneJS;
 	}
 }
 ?>

@@ -35,15 +35,16 @@ var BigPipe = (function() {
 	//==============================================================================
 	// Resource: Represents a single CSS or JS resource
 	//==============================================================================
-	function Resource(resourceURL, type, pageletID, phaseDoneJS) {
+	function Resource(dataJSON, type, pageletID) {
+		this.ID   = dataJSON.ID;
+		this.HREF = dataJSON.HREF;
 		this.pageletID = pageletID;
-		this.resourceURL = resourceURL;
 		this.callbacks = [];
 		this.node = false;
 		this.done = false;
 		this.type = type;
 
-		this.phaseDoneJS = phaseDoneJS;
+		this.phaseDoneJS = dataJSON.PHASE;
 		this.phase = 0;
 
 		PhaseDoneJS.handler(this, Resource.PHASE_INIT);
@@ -86,14 +87,14 @@ var BigPipe = (function() {
 	Resource.prototype.execute = function() {
 		switch(this.type) {
 			case Resource.TYPE_STYLESHEET:
-				this.node = document.createElement('link');
-				this.node.setAttribute('rel', 'stylesheet');
-				this.node.setAttribute('href', this.resourceURL);
+				this.node = document.createElement("link");
+				this.node.setAttribute("rel", "stylesheet");
+				this.node.setAttribute("href", this.HREF);
 				break;
 			case Resource.TYPE_JAVASCRIPT:
-				this.node = document.createElement('script');
-				this.node.setAttribute('src', this.resourceURL);
-				this.node.setAttribute('async', true);
+				this.node = document.createElement("script");
+				this.node.setAttribute("src", this.HREF);
+				this.node.setAttribute("async", true);
 				break;
 			default:
 				return false;
@@ -129,14 +130,14 @@ var BigPipe = (function() {
 	//==============================================================================
 	// Pagelet: Represents a single pagelet
 	//==============================================================================
-	function Pagelet(data, HTML) {
-		this.ID   = data.ID;
-		this.NEED = data.NEED;
+	function Pagelet(dataJSON, HTML) {
+		this.ID   = dataJSON.ID;
+		this.NEED = dataJSON.NEED;
 		this.HTML = HTML;
-		this.JSCode = data.CODE;
-		this.phaseDoneJS = data.PHASE;
-		this.stylesheets = data.RSRC[Resource.TYPE_STYLESHEET];
-		this.javascripts = data.RSRC[Resource.TYPE_JAVASCRIPT];
+		this.JSCode = dataJSON.CODE;
+		this.phaseDoneJS = dataJSON.PHASE;
+		this.stylesheets = dataJSON.RSRC[Resource.TYPE_STYLESHEET];
+		this.javascripts = dataJSON.RSRC[Resource.TYPE_JAVASCRIPT];
 
 		this.phase = 0;
 		this.resources = [[], []];
@@ -157,18 +158,13 @@ var BigPipe = (function() {
 	// Pagelet: Initialize the pagelet resources
 	//==============================================================================
 	Pagelet.prototype.initializeResources = function() {
-		var resourceURL;
-		var phaseDoneJS;
+		this.stylesheets.forEach(function(data) {
+			this.attachResource(new Resource(data, Resource.TYPE_STYLESHEET, this.ID));
+		}.bind(this));
 
-		for(resourceURL in this.stylesheets) {
-			phaseDoneJS = this.stylesheets[resourceURL];
-			this.attachResource(new Resource(resourceURL, Resource.TYPE_STYLESHEET, this.ID, phaseDoneJS));
-		}
-
-		for(resourceURL in this.javascripts) {
-			phaseDoneJS = this.javascripts[resourceURL];
-			this.attachResource(new Resource(resourceURL, Resource.TYPE_JAVASCRIPT, this.ID, phaseDoneJS));
-		}
+		this.javascripts.forEach(function(data) {
+			this.attachResource(new Resource(data, Resource.TYPE_JAVASCRIPT, this.ID));
+		}.bind(this));
 	};
 
 	//==============================================================================
