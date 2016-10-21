@@ -33,7 +33,7 @@ $PageletGreen = new BigPipe\Pagelet('greenPL');
 	#===============================================================================
 	# Pagelet within $PageletGreen
 	#===============================================================================
-	// The third parameter is required to ensure that the $InnerPagelet will only be
+	// The addDependency call is required to ensure that $InnerPagelet will only be
 	// executed if the HTML from the $PageletGreen has ALREADY DISPLAYED. Otherwise,
 	// $InnerPagelet would not find his placeholder tag which is defined WITHIN the
 	// HTML on $PageletGreen. Of course, you can still add other pagelets as
@@ -44,7 +44,12 @@ $PageletGreen = new BigPipe\Pagelet('greenPL');
 	// the first which arrives, but it will first be displayed if his dependency
 	// pagelets are already displayed.
 
-	$InnerPagelet = new BigPipe\Pagelet('innerPL', BigPipe\Pagelet::PRIORITY_HIGHEST, [$PageletGreen->getID()]);
+	$InnerPagelet = new BigPipe\Pagelet('innerPL', BigPipe\Pagelet::PRIORITY_HIGHEST);
+
+	// NOTICE: You can also use the Pagelet ID (as string) as argument. May be helpful
+	// if a dependency Pagelet object is not accessible within the current scope.
+	$InnerPagelet->addDependency($PageletGreen);
+
 	$InnerPagelet->addHTML('<section sytle="background:#FFF;padding:5px;">Inner Pagelet \(o_o)/</section>');
 }
 

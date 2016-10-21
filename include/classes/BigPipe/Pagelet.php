@@ -34,9 +34,8 @@ class Pagelet extends Item {
 	const PHASE_LOADJS  = 3; # After all the JS resources have been loaded
 	const PHASE_DONE    = 4; # After the static JS code has been executed
 
-	public function __construct($customID = NULL, $priority = self::PRIORITY_NORMAL, array $dependencies = []) {
+	public function __construct($customID = NULL, $priority = self::PRIORITY_NORMAL) {
 		$this->ID = $customID ?? 'P'.++self::$count;
-		$this->dependencies = $dependencies;
 
 		$this->resources   = array_pad($this->resources,   2, []);
 		$this->phaseDoneJS = array_pad($this->phaseDoneJS, 5, []);
@@ -69,7 +68,7 @@ class Pagelet extends Item {
 	# Return all display dependencies
 	#===============================================================================
 	public function getDependencies(): array {
-		return $this->dependencies;
+		return array_unique($this->dependencies);
 	}
 
 	#===============================================================================
@@ -105,6 +104,17 @@ class Pagelet extends Item {
 	#===============================================================================
 	public function addJSCode($code) {
 		return $this->JSCode[] = $code;
+	}
+
+	#===============================================================================
+	# Attach a display dependency
+	#===============================================================================
+	public function addDependency($Pagelet) {
+		if($Pagelet instanceof Pagelet) {
+			return $this->dependencies[] = $Pagelet->getID();
+		}
+
+		return $this->dependencies[] = $Pagelet;
 	}
 
 	#===============================================================================

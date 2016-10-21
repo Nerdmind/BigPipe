@@ -5,7 +5,7 @@
 #                                                                              #
 # The BigPipe main class is responsible for sorting and rendering the pagelets #
 # and their associated resources. This class also provides methods to turn off #
-# the pipelining mode or turn on the debugging mode.                           #
+# the pipeline mode or turn on the debugging mode.                             #
 #                                                                              #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
 namespace BigPipe;
