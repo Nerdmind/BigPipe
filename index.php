@@ -36,7 +36,6 @@ require_once 'include/pagelets.php';
 		html{margin:0;padding:0;background:#B9C3D2;font-family:Calibri,Sans-Serif;}
 		body{max-width:1200px;margin:0 auto;}
 		.text{color:white;margin-bottom:30px;padding:40px;border-radius:4px;font-weight:600;text-align:center;border:4px solid black;}
-		.hidden{display:none;}
 	</style>
 	<script>
 		var globalExecution = function globalExecution(code) {

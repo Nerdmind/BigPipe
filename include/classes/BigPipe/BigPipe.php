@@ -90,7 +90,7 @@ class BigPipe {
 
 		$pageletJSON = json_encode($pageletJSON, (self::debugging() ? JSON_PRETTY_PRINT : NULL));
 
-		echo "<code class=\"hidden\" id=\"_{$Pagelet->getID()}\"><!-- {$pageletHTML} --></code>\n";
+		echo "<code hidden id=\"_{$Pagelet->getID()}\"><!-- {$pageletHTML} --></code>\n";
 		echo "<script>BigPipe.onPageletArrive({$pageletJSON}, document.getElementById(\"_{$Pagelet->getID()}\"));</script>\n\n";
 	}
 
