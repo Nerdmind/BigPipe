@@ -21,7 +21,7 @@ require_once 'include/functions.php';
 #===============================================================================
 if(isset($_GET['bigpipe']) AND (int) $_GET['bigpipe'] === 0) {
 	// You can also check for search spiders and disable the pipeline
-	BigPipe\BigPipe::enablePipeline(FALSE);
+	BigPipe\BigPipe::enabled(FALSE);
 }
 
 // Outsourced to avoid duplicate code in index.php and async.php
