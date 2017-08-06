@@ -86,17 +86,17 @@ class Pagelet extends Item {
 	}
 
 	#===============================================================================
-	# Short: Add CSS resource by URL
+	# Short: Add stylesheet resource by URL
 	#===============================================================================
 	public function addCSS($resourceURL): Resource {
-		return $this->addResource(new Resource\CSS(NULL, $resourceURL));
+		return $this->addResource(new Resource\Stylesheet(NULL, $resourceURL));
 	}
 
 	#===============================================================================
-	# Short: Add JS resource by URL
+	# Short: Add javascript resource by URL
 	#===============================================================================
 	public function addJS($resourceURL): Resource {
-		return $this->addResource(new Resource\JS(NULL, $resourceURL));
+		return $this->addResource(new Resource\Javascript(NULL, $resourceURL));
 	}
 
 	#===============================================================================
