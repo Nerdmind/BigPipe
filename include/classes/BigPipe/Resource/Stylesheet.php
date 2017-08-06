@@ -1,6 +1,6 @@
 <?php
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
-# Resource representation class [JS]         [Thomas Lange <code@nerdmind.de>] #
+# Resource representation [stylesheet]       [Thomas Lange <code@nerdmind.de>] #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
 #                                                                              #
 # [More information coming soon]                                               #
@@ -8,20 +8,20 @@
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
 namespace BigPipe\Resource;
 
-class JS extends \BigPipe\Resource {
+class Stylesheet extends \BigPipe\Resource {
 
 	#===============================================================================
 	# Build resource
 	#===============================================================================
 	public function __construct($customID = NULL, $resourceURL) {
-		parent::__construct($customID, parent::TYPE_JAVASCRIPT, $resourceURL);
+		parent::__construct($customID, parent::TYPE_STYLESHEET, $resourceURL);
 	}
 
 	#===============================================================================
 	# Render resource HTML
 	#===============================================================================
 	public function renderHTML() {
-		return sprintf('<script data-id="%s" src="%s"></script>', $this->getID(), $this->getURL());
+		return sprintf('<link data-id="%s" href="%s" rel="stylesheet" />', $this->getID(), $this->getURL());
 	}
 }
 ?>
