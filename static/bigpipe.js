@@ -35,10 +35,9 @@ var BigPipe = (function() {
 	//==============================================================================
 	// Resource: Represents a single CSS or JS resource
 	//==============================================================================
-	function Resource(dataJSON, type, pageletID) {
+	function Resource(dataJSON, type) {
 		this.ID   = dataJSON.ID;
 		this.HREF = dataJSON.HREF;
-		this.pageletID = pageletID;
 		this.callbacks = [];
 		this.node = false;
 		this.done = false;
@@ -159,11 +158,11 @@ var BigPipe = (function() {
 	//==============================================================================
 	Pagelet.prototype.initializeResources = function() {
 		this.stylesheets.forEach(function(data) {
-			this.attachResource(new Resource(data, Resource.TYPE_STYLESHEET, this.ID));
+			this.attachResource(new Resource(data, Resource.TYPE_STYLESHEET));
 		}.bind(this));
 
 		this.javascripts.forEach(function(data) {
-			this.attachResource(new Resource(data, Resource.TYPE_JAVASCRIPT, this.ID));
+			this.attachResource(new Resource(data, Resource.TYPE_JAVASCRIPT));
 		}.bind(this));
 	};
 
@@ -207,7 +206,7 @@ var BigPipe = (function() {
 		}
 
 		return this.resources[resource.type].push(resource);
-	}
+	};
 
 	//==============================================================================
 	// Pagelet: Executes the main JS code of the pagelet
