@@ -1,17 +1,17 @@
 //==============================================================================
-// Revealing Module Pattern
+// BigPipe Module
 //==============================================================================
-var BigPipe = (function() {
+BigPipe = (function() {
 
 	//==============================================================================
-	// PhaseDoneJS object; responsible for Pagelet and Resource
+	// PhaseDoneJS: Responsible for Pagelet and Resource
 	//==============================================================================
-	var PhaseDoneJS = {
+	let PhaseDoneJS = {
 		//==============================================================================
-		// PhaseDoneJS: Increases phase and executes callbacks
+		// Increase phase and execute callbacks
 		//==============================================================================
 		handler: function(context, phase) {
-			for(var currentPhase = context.phase; currentPhase <= phase; ++currentPhase) {
+			for(let currentPhase = context.phase; currentPhase <= phase; ++currentPhase) {
 				this.execute(context, currentPhase);
 			}
 
@@ -19,7 +19,7 @@ var BigPipe = (function() {
 		},
 
 		//==============================================================================
-		// PhaseDoneJS: Executes the callbacks of the given phase
+		// Execute callbacks of the given phase
 		//==============================================================================
 		execute: function(context, phase) {
 			context.phaseDoneJS[phase].forEach(function(code) {
@@ -33,7 +33,7 @@ var BigPipe = (function() {
 	};
 
 	//==============================================================================
-	// Resource: Represents a single CSS or JS resource
+	// Resource: Represents a resource
 	//==============================================================================
 	function Resource(dataJSON, type) {
 		this.ID   = dataJSON.ID;
@@ -99,7 +99,7 @@ var BigPipe = (function() {
 				return false;
 		}
 
-		var callback = function() {
+		let callback = function() {
 			PhaseDoneJS.handler(this, Resource.PHASE_DONE);
 			this.executeCallbacks();
 		}.bind(this);
@@ -121,13 +121,13 @@ var BigPipe = (function() {
 			this.node.onerror = null;
 
 			// Remove element from DOM
-			var parentNode = this.node.parentNode;
+			let parentNode = this.node.parentNode;
 			return parentNode.removeChild(this.node);
 		}
 	};
 
 	//==============================================================================
-	// Pagelet: Represents a single pagelet
+	// Pagelet: Represents a pagelet
 	//==============================================================================
 	function Pagelet(dataJSON, HTML) {
 		this.ID   = dataJSON.ID;
@@ -170,7 +170,7 @@ var BigPipe = (function() {
 	// Pagelet: Executes all resources of the specific type
 	//==============================================================================
 	Pagelet.prototype.executeResources = function(type) {
-		var somethingExecuted = false;
+		let somethingExecuted = false;
 
 		this.resources[type].forEach(function(resource) {
 			somethingExecuted = true;
@@ -260,18 +260,18 @@ var BigPipe = (function() {
 	//==============================================================================
 	// BigPipe
 	//==============================================================================
-	var BigPipe = {
+	let BigPipe = {
 		pagelets: [],
 		phase: 0,
 		done: [],
 		wait: [],
 
 		onPageletArrive: function(data, codeContainer) {
-			var pageletHTML = codeContainer.innerHTML;
+			let pageletHTML = codeContainer.innerHTML;
 			pageletHTML = pageletHTML.substring(5, pageletHTML.length - 4);
 			codeContainer.parentNode.removeChild(codeContainer);
 
-			var pagelet = new Pagelet(data, pageletHTML);
+			let pagelet = new Pagelet(data, pageletHTML);
 
 			this.pagelets.push(pagelet);
 
@@ -297,8 +297,8 @@ var BigPipe = (function() {
 		pageletHTMLreplaced: function(pageletID) {
 			BigPipe.done.push(pageletID);
 
-			for(var i = 0; i < this.wait.length; ++i) {
-				var pagelet = this.wait[i];
+			for(let i = 0; i < this.wait.length; ++i) {
+				let pagelet = this.wait[i];
 
 				// Check if all IDs from NEED exists within BigPipe.done
 				// If this is true, then all required dependencies are satisfied.
