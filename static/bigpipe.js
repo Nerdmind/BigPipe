@@ -347,7 +347,11 @@ var BigPipe = (function() {
 				});
 			});
 
-			window.stop() || document.execCommand("Stop");
+			try {
+				window.stop();
+			} catch(e) {
+				document.execCommand('Stop');
+			}
 
 			BigPipe.pagelets = [];
 			BigPipe.phase = 0;
