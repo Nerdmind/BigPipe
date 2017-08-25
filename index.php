@@ -37,11 +37,6 @@ require_once 'include/pagelets.php';
 		body{max-width:1200px;margin:0 auto;}
 		.text{color:white;margin-bottom:30px;padding:40px;border-radius:4px;font-weight:600;text-align:center;border:4px solid black;}
 	</style>
-	<script>
-		var globalExecution = function globalExecution(code) {
-			window.execScript ? window.execScript(code) : window.eval.call(window, code);
-		};
-	</script>
 	<script src="static/bigpipe.js"></script>
 	<title>BigPipe Demo</title>
 </head>

@@ -24,7 +24,7 @@ var BigPipe = (function() {
 		execute: function(context, phase) {
 			context.phaseDoneJS[phase].forEach(function(code) {
 				try {
-					globalExecution(code);
+					window.eval.call(window, code);
 				} catch(e) {
 					console.error("PhaseDoneJS: " + e);
 				}
@@ -215,7 +215,7 @@ var BigPipe = (function() {
 	Pagelet.prototype.executeJSCode = function() {
 		this.JSCode.forEach(function(code) {
 			try {
-				globalExecution(code);
+				window.eval.call(window, code);
 			} catch(e) {
 				console.error(this.ID + ": " + e);
 			}
