@@ -99,10 +99,10 @@ BigPipe = (function() {
 				return false;
 		}
 
-		let callback = function() {
+		const callback = () => {
 			PhaseDoneJS.handler(this, Resource.PHASE_DONE);
 			this.executeCallbacks();
-		}.bind(this);
+		};
 
 		this.node.onload  = callback;
 		this.node.onerror = callback;
@@ -157,13 +157,13 @@ BigPipe = (function() {
 	// Pagelet: Initialize the pagelet resources
 	//==============================================================================
 	Pagelet.prototype.initializeResources = function() {
-		this.stylesheets.forEach(function(data) {
+		this.stylesheets.forEach(data => {
 			this.attachResource(new Resource(data, Resource.TYPE_STYLESHEET));
-		}.bind(this));
+		});
 
-		this.javascripts.forEach(function(data) {
+		this.javascripts.forEach(data => {
 			this.attachResource(new Resource(data, Resource.TYPE_JAVASCRIPT));
-		}.bind(this));
+		});
 	};
 
 	//==============================================================================
@@ -175,7 +175,7 @@ BigPipe = (function() {
 		this.resources[type].forEach(function(resource) {
 			somethingExecuted = true;
 			resource.execute();
-		}.bind(this));
+		});
 
 		return somethingExecuted;
 	};
@@ -197,11 +197,11 @@ BigPipe = (function() {
 	Pagelet.prototype.attachResource = function(resource) {
 		switch(resource.type) {
 			case Resource.TYPE_STYLESHEET:
-				resource.registerCallback(this.onloadCSS.bind(this));
+				resource.registerCallback(() => this.onloadCSS());
 				break;
 
 			case Resource.TYPE_JAVASCRIPT:
-				resource.registerCallback(this.onloadJS.bind(this));
+				resource.registerCallback(() => this.onloadJS());
 				break;
 		}
 
