@@ -14,7 +14,6 @@ class BigPipe {
 	private static $debugging = FALSE;
 	private static $enabled   = TRUE;
 	private static $pagelets  = [];
-	private static $count     = 0;
 
 	#===============================================================================
 	# Enable or disable the pipeline mode
@@ -39,11 +38,17 @@ class BigPipe {
 	}
 
 	#===============================================================================
-	# Add a new pagelet to pipeline
+	# Insert pagelet into queue
 	#===============================================================================
-	public static function addPagelet(Pagelet $Pagelet, $priority) {
-		self::$pagelets[$priority][] = $Pagelet;
-		return ++self::$count;
+	public static function enqueue(Pagelet $Pagelet) {
+		self::$pagelets[spl_object_hash($Pagelet)] = $Pagelet;
+	}
+
+	#===============================================================================
+	# Remove pagelet from queue
+	#===============================================================================
+	public static function dequeue(Pagelet $Pagelet) {
+		unset(self::$pagelets[spl_object_hash($Pagelet)]);
 	}
 
 	#===============================================================================
@@ -102,24 +107,32 @@ class BigPipe {
 	}
 
 	#===============================================================================
-	# Render the pagelets
+	# Renders all remaining pagelets from the queue in the appropriate order
 	#===============================================================================
 	public static function render() {
 		self::flushOutputBuffer();
 
 		$i = 0;
 
-		ksort(self::$pagelets);
+		$pagelets_ordered = [];
 
-		foreach(array_reverse(self::$pagelets) as $priority => $pagelets) {
+		foreach(self::$pagelets as $Pagelet) {
+			$pagelets_ordered[$Pagelet->getPriority()][] = $Pagelet;
+		}
+
+		krsort($pagelets_ordered);
+
+		if(!empty($pagelets_ordered)) {
+			$pagelets = call_user_func_array('array_merge', $pagelets_ordered);
+
 			foreach($pagelets as $Pagelet) {
 				if(!self::enabled()) {
 					foreach($Pagelet->getResources()[Resource::TYPE_STYLESHEET] as $Resource) {
-						echo $Resource->renderHTML()."\n";
+						echo "{$Resource->renderHTML()}\n";
 					}
 
 					foreach($Pagelet->getResources()[Resource::TYPE_JAVASCRIPT] as $Resource) {
-						echo $Resource->renderHTML()."\n";
+						echo "{$Resource->renderHTML()}\n";
 					}
 
 					foreach($Pagelet->getJSCode() as $JSCode) {
@@ -128,7 +141,7 @@ class BigPipe {
 				}
 
 				else {
-					self::singleResponse($Pagelet, (self::$count === ++$i));
+					self::singleResponse($Pagelet, (count(self::$pagelets) === ++$i));
 					self::flushOutputBuffer();
 				}
 			}

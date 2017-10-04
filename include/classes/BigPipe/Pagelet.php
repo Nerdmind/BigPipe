@@ -43,7 +43,7 @@ class Pagelet extends Item {
 		$this->resources   = array_pad($this->resources,   2, []);
 		$this->phaseDoneJS = array_pad($this->phaseDoneJS, 5, []);
 
-		BigPipe::addPagelet($this, $priority);
+		BigPipe::enqueue($this);
 	}
 
 	#===============================================================================
