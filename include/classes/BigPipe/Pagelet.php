@@ -11,6 +11,7 @@ namespace BigPipe;
 class Pagelet extends Item {
 	private $HTML         = '';
 	private $JSCode       = [];
+	private $priority     = NULL;
 	private $resources    = [];
 	private $dependencies = [];
 	private $tagname      = 'div';
@@ -38,10 +39,18 @@ class Pagelet extends Item {
 	public function __construct($customID = NULL, $priority = self::PRIORITY_NORMAL) {
 		$this->ID = $customID ?? 'P'.++self::$count;
 
+		$this->priority    = $priority;
 		$this->resources   = array_pad($this->resources,   2, []);
 		$this->phaseDoneJS = array_pad($this->phaseDoneJS, 5, []);
 
 		BigPipe::addPagelet($this, $priority);
+	}
+
+	#===============================================================================
+	# Return the priority
+	#===============================================================================
+	public function getPriority() {
+		return $this->priority;
 	}
 
 	#===============================================================================
