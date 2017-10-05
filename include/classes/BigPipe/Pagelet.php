@@ -119,12 +119,8 @@ class Pagelet extends Item {
 	#===============================================================================
 	# Attach a display dependency
 	#===============================================================================
-	public function addDependency($Pagelet) {
-		if($Pagelet instanceof Pagelet) {
-			return $this->dependencies[] = $Pagelet->getID();
-		}
-
-		return $this->dependencies[] = $Pagelet;
+	public function addDependency(Pagelet $Pagelet) {
+		return $this->dependencies[] = $Pagelet->getID();
 	}
 
 	#===============================================================================
