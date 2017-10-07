@@ -9,9 +9,8 @@ BigPipe\BigPipe::debugging(TRUE);
 #===============================================================================
 $PageletRed = new BigPipe\Pagelet('redPL');
 $PageletRed->addHTML('<section id="red" class="text">I AM A PAGELET WITH RED BACKGROUND</section>');
-$PageletRed->addCSS('static/red.php');
-$PageletRed->addCSS('static/red.php');
-$PageletRed->addJS('static/delayJS.php');
+$PageletRed->addResource(new BigPipe\Resource\Stylesheet(NULL, 'static/red.php'));
+$PageletRed->addResource(new BigPipe\Resource\Javascript(NULL, 'static/delayJS.php'));
 $PageletRed->addJSCode("document.getElementById('red').innerHTML += ' [JS executed]';document.getElementById('red').style.borderRadius = '30px';");
 
 #===============================================================================
@@ -19,9 +18,8 @@ $PageletRed->addJSCode("document.getElementById('red').innerHTML += ' [JS execut
 #===============================================================================
 $PageletBlue = new BigPipe\Pagelet('bluePL', BigPipe\Pagelet::PRIORITY_HIGH);
 $PageletBlue->addHTML('<section id="blue" class="text">I AM A PAGELET WITH BLUE BACKGROUND</section>');
-$PageletBlue->addCSS('static/blue.php');
-$PageletRed->addCSS('static/red.php');
-$PageletBlue->addJS('static/delayJS.php');
+$PageletBlue->addResource(new BigPipe\Resource\Stylesheet(NULL, 'static/blue.php'));
+$PageletBlue->addResource(new BigPipe\Resource\Javascript(NULL, 'static/delayJS.php'));
 $PageletBlue->addJSCode("document.getElementById('blue').innerHTML += ' [JS executed]';document.getElementById('blue').style.borderRadius = '30px';");
 
 #===============================================================================
@@ -54,7 +52,7 @@ $PageletGreen = new BigPipe\Pagelet('greenPL');
 }
 
 $PageletGreen->addHTML('<section id="green" class="text">I AM A PAGELET WITH GREEN BACKGROUND'.$InnerPagelet.'</section>');
-$PageletGreen->addCSS('static/green.php');
-$PageletGreen->addJS('static/delayJS.php');
+$PageletGreen->addResource(new BigPipe\Resource\Stylesheet(NULL, 'static/green.php'));
+$PageletGreen->addResource(new BigPipe\Resource\Javascript(NULL, 'static/delayJS.php'));
 $PageletGreen->addJSCode("document.getElementById('green').innerHTML += ' [JS executed]';document.getElementById('green').style.borderRadius = '30px';");
 ?>
