@@ -64,27 +64,7 @@ class BigPipe {
 			usleep(rand(125, 175) * 2000);
 		}
 
-		$stylesheets = [];
-		$javascripts = [];
-
-		foreach($Pagelet->getResources()[Resource::TYPE_STYLESHEET] as $Resource) {
-			$stylesheets[] = ['ID' => $Resource->getID(), 'HREF' => $Resource->getURL(), 'PHASE' => $Resource->getPhaseDoneJS()];
-		}
-
-		foreach($Pagelet->getResources()[Resource::TYPE_JAVASCRIPT] as $Resource) {
-			$javascripts[] = ['ID' => $Resource->getID(), 'HREF' => $Resource->getURL(), 'PHASE' => $Resource->getPhaseDoneJS()];
-		}
-
-		$pageletJSON = [
-			'ID'   => $Pagelet->getID(),
-			'NEED' => $Pagelet->getDependencies(),
-			'RSRC' => [
-				Resource::TYPE_STYLESHEET => $stylesheets,
-				Resource::TYPE_JAVASCRIPT => $javascripts,
-			],
-			'CODE' => removeLineBreaksAndTabs($Pagelet->getJSCode()),
-			'PHASE' => $Pagelet->getPhaseDoneJS()
-		];
+		$pageletJSON = $Pagelet->getStructure();
 
 		if($last) {
 			$pageletJSON['IS_LAST'] = TRUE;

@@ -55,5 +55,12 @@ abstract class Resource extends Item {
 	public function getURL() {
 		return $this->resourceURL;
 	}
+
+	#===============================================================================
+	# Return the resource structure
+	#===============================================================================
+	public function getStructure(): array {
+		return ['ID' => $this->getID(), 'HREF' => $this->getURL(), 'PHASE' => $this->getPhaseDoneJS()];
+	}
 }
 ?>

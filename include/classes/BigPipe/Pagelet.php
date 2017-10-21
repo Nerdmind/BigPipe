@@ -124,6 +124,30 @@ class Pagelet extends Item {
 	}
 
 	#===============================================================================
+	# Return the pagelet structure
+	#===============================================================================
+	public function getStructure(): array {
+		foreach($this->getResources()[Resource::TYPE_STYLESHEET] as $Resource) {
+			$stylesheets[] = $Resource->getStructure();
+		}
+
+		foreach($this->getResources()[Resource::TYPE_JAVASCRIPT] as $Resource) {
+			$javascripts[] = $Resource->getStructure();
+		}
+
+		return [
+			'ID' => $this->getID(),
+			'NEED' => $this->getDependencies(),
+			'RSRC' => [
+				Resource::TYPE_STYLESHEET => $stylesheets ?? [],
+				Resource::TYPE_JAVASCRIPT => $javascripts ?? []
+			],
+			'CODE' => removeLineBreaksAndTabs($this->getJSCode()),
+			'PHASE' => $this->getPhaseDoneJS()
+		];
+	}
+
+	#===============================================================================
 	# Magic method: __toString()
 	#===============================================================================
 	public function __toString() {
