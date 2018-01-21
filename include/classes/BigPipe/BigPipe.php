@@ -64,7 +64,7 @@ class BigPipe {
 	#===============================================================================
 	# Renders all remaining pagelets from the queue in the appropriate order
 	#===============================================================================
-	public static function render() {
+	public static function completeResponse() {
 		self::flushOutputBuffer();
 
 		$pagelets_ordered = [];

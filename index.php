@@ -58,7 +58,7 @@ echo $PageletGreen;
 <footer><strong>The footer of the page.</strong></footer>
 
 <?php
-BigPipe\BigPipe::render();
+BigPipe\BigPipe::completeResponse();
 ?>
 </body>
 </html>

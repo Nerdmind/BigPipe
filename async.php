@@ -121,7 +121,7 @@ if(isAsyncRequest()) {
 	echo '<script>Application.placeholderHTML('.json_encode($BUFFER).');</script>'."\n\n";
 }
 
-BigPipe\BigPipe::render();
+BigPipe\BigPipe::completeResponse();
 ?>
 </body>
 </html>
