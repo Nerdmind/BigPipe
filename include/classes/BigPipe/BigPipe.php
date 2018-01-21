@@ -67,8 +67,6 @@ class BigPipe {
 	public static function render() {
 		self::flushOutputBuffer();
 
-		$i = 0;
-
 		$pagelets_ordered = [];
 
 		foreach(self::$pagelets as $Pagelet) {
@@ -80,8 +78,19 @@ class BigPipe {
 		if(!empty($pagelets_ordered)) {
 			$pagelets = call_user_func_array('array_merge', $pagelets_ordered);
 
-			foreach($pagelets as $Pagelet) {
-				if(!self::enabled()) {
+			if(self::enabled()) {
+				foreach($pagelets as $Pagelet) {
+					self::singleResponse($Pagelet);
+					self::flushOutputBuffer();
+				}
+			}
+
+			# NOTE: If BigPipe is disabled, Pagelet::flush() will NOT call BigPipe::dequeue().
+			# This means that (if the pipeline is disabled) $pagelets_ordered contains ALL
+			# Pagelets regardless of whether if Pagelet::flush() was already called. And then
+			# we can iterate over them and echo all requiered CSS and JS resources.
+			else {
+				foreach($pagelets as $Pagelet) {
 					foreach($Pagelet->getResources()[Resource::TYPE_STYLESHEET] as $Resource) {
 						echo "{$Resource->renderHTML()}\n";
 					}
@@ -94,15 +103,10 @@ class BigPipe {
 						echo "<script>{$JSCode}</script>\n";
 					}
 				}
-
-				else {
-					self::singleResponse($Pagelet);
-					self::flushOutputBuffer();
-				}
 			}
 		}
 
-		if(BigPipe::enabled()) {
+		if(self::enabled()) {
 			echo "<script>BigPipe.onLastPageletArrived();</script>\n";
 		}
 	}
