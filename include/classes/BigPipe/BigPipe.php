@@ -40,21 +40,6 @@ class BigPipe {
 	}
 
 	#===============================================================================
-	# Prints a single pagelet response
-	#===============================================================================
-	private static function singleResponse(Pagelet $Pagelet) {
-		$pageletJSON = $Pagelet->getStructure();
-
-		$pageletHTML = removeLineBreaksAndTabs($Pagelet->getHTML());
-		$pageletHTML = str_replace('--', '&#45;&#45;', $pageletHTML);
-
-		$pageletJSON = json_encode($pageletJSON);
-
-		echo "<code hidden id=\"_{$Pagelet->getID()}\"><!-- {$pageletHTML} --></code>\n";
-		echo "<script>BigPipe.onPageletArrive({$pageletJSON}, document.getElementById(\"_{$Pagelet->getID()}\"));</script>\n\n";
-	}
-
-	#===============================================================================
 	# Sends output buffer so far as possible towards user
 	#===============================================================================
 	public static function flushOutputBuffer() {
@@ -80,8 +65,7 @@ class BigPipe {
 
 			if(self::enabled()) {
 				foreach($pagelets as $Pagelet) {
-					self::singleResponse($Pagelet);
-					self::flushOutputBuffer();
+					$Pagelet->flush();
 				}
 			}
 

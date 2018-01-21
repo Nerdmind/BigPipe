@@ -148,6 +148,24 @@ class Pagelet extends Item {
 	}
 
 	#===============================================================================
+	# Flush pagelet immediately
+	#===============================================================================
+	public function flush() {
+		if(BigPipe::enabled()) {
+			$pageletHTML = removeLineBreaksAndTabs($this->getHTML());
+			$pageletHTML = str_replace('--', '&#45;&#45;', $pageletHTML);
+
+			$pageletJSON = json_encode($this->getStructure());
+
+			echo "<code hidden id=\"_{$this->getID()}\"><!-- {$pageletHTML} --></code>\n";
+			echo "<script>BigPipe.onPageletArrive({$pageletJSON}, document.getElementById(\"_{$this->getID()}\"));</script>\n\n";
+
+			BigPipe::dequeue($this);
+			BigPipe::flushOutputBuffer();
+		}
+	}
+
+	#===============================================================================
 	# Magic method: __toString()
 	#===============================================================================
 	public function __toString() {
