@@ -42,12 +42,8 @@ class BigPipe {
 	#===============================================================================
 	# Prints a single pagelet response
 	#===============================================================================
-	private static function singleResponse(Pagelet $Pagelet, $last = FALSE) {
+	private static function singleResponse(Pagelet $Pagelet) {
 		$pageletJSON = $Pagelet->getStructure();
-
-		if($last) {
-			$pageletJSON['IS_LAST'] = TRUE;
-		}
 
 		$pageletHTML = removeLineBreaksAndTabs($Pagelet->getHTML());
 		$pageletHTML = str_replace('--', '&#45;&#45;', $pageletHTML);
@@ -100,10 +96,14 @@ class BigPipe {
 				}
 
 				else {
-					self::singleResponse($Pagelet, (count(self::$pagelets) === ++$i));
+					self::singleResponse($Pagelet);
 					self::flushOutputBuffer();
 				}
 			}
+		}
+
+		if(BigPipe::enabled()) {
+			echo "<script>BigPipe.onLastPageletArrived();</script>\n";
 		}
 	}
 }

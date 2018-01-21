@@ -270,6 +270,7 @@ BigPipe = (function() {
 		phase: 0,
 		done: [],
 		wait: [],
+		interval: null,
 
 		onPageletArrive(data, codeContainer) {
 			let pageletHTML = codeContainer.innerHTML;
@@ -284,10 +285,6 @@ BigPipe = (function() {
 				this.phase = 1;
 			}
 
-			if(data.IS_LAST) {
-				this.phase = 2;
-			}
-
 			if(pagelet.NEED.length === 0 || pagelet.NEED.every(function(needID) {
 					return BigPipe.done.indexOf(needID) !== -1;
 				})) {
@@ -297,6 +294,17 @@ BigPipe = (function() {
 			else {
 				this.wait.push(pagelet);
 			}
+		},
+
+		onLastPageletArrived() {
+			this.phase = 2;
+
+			this.interval = setInterval(() => {
+				if(this.done.length === this.pagelets.length) {
+					clearInterval(this.interval);
+					this.executeJavascriptResources();
+				}
+			}, 50);
 		},
 
 		onPageletHTMLreplaced(pageletID) {
@@ -313,11 +321,6 @@ BigPipe = (function() {
 					BigPipe.wait.splice(i--, 1); // remove THIS pagelet from wait list
 					pagelet.execute();
 				}
-			}
-
-			// Check if this was the last pagelet and then execute loading of the external JS resources
-			if(BigPipe.phase === 2 && BigPipe.done.length === BigPipe.pagelets.length) {
-				BigPipe.executeJavascriptResources();
 			}
 		},
 
@@ -340,6 +343,10 @@ BigPipe = (function() {
 			BigPipe.onPageletArrive(data, codeContainer);
 		},
 
+		onLastPageletArrived() {
+			BigPipe.onLastPageletArrived();
+		},
+
 		reset() {
 			BigPipe.pagelets.forEach(function(pagelet) {
 				pagelet.resources[Resource.TYPE_STYLESHEET].forEach(function(resource) {
@@ -356,6 +363,8 @@ BigPipe = (function() {
 			} catch(e) {
 				document.execCommand('Stop');
 			}
+
+			clearInterval(BigPipe.interval);
 
 			BigPipe.pagelets = [];
 			BigPipe.phase = 0;
