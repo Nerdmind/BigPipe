@@ -11,7 +11,6 @@ namespace BigPipe;
 abstract class Resource extends Item {
 	private $type         = '';
 	private $resourceURL  = '';
-	private static $count = 0;
 
 	#===============================================================================
 	# Render resource HTML for disabled pipeline
@@ -35,7 +34,7 @@ abstract class Resource extends Item {
 	# Build resource
 	#===============================================================================
 	public function __construct($customID = NULL, $type, $resourceURL) {
-		$this->ID = $customID ?? 'R'.++self::$count;
+		$this->ID = $customID ?? spl_object_hash($this);
 		$this->type = $type;
 		$this->resourceURL = $resourceURL;
 

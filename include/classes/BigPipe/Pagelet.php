@@ -16,7 +16,6 @@ class Pagelet extends Item {
 	private $dependencies = [];
 	private $tagname      = 'div';
 	private $tagHTML      = '';
-	private static $count = 0;
 
 	#===============================================================================
 	# Priorities for pagelet sorting
@@ -37,7 +36,7 @@ class Pagelet extends Item {
 	const PHASE_DONE    = 4; # After the static JS code has been executed
 
 	public function __construct($customID = NULL, $priority = self::PRIORITY_NORMAL) {
-		$this->ID = $customID ?? 'P'.++self::$count;
+		$this->ID = $customID ?? spl_object_hash($this);
 
 		$this->priority    = $priority;
 		$this->resources   = array_pad($this->resources,   2, []);
