@@ -16,8 +16,8 @@ $javascript = ($DEBUGGING ? 'Debugging' : 'BigPipe').'\Resource\Javascript';
 #===============================================================================
 $PageletRed = new $pagelet('redPL');
 $PageletRed->addHTML('<section id="red" class="text">I AM A PAGELET WITH RED BACKGROUND</section>');
-$PageletRed->addResource(new $stylesheet(NULL, 'static/red.php'));
-$PageletRed->addResource(new $javascript(NULL, 'static/delayJS.php'));
+$PageletRed->addResource(new $stylesheet('red-stylesheet', 'static/red.php'));
+$PageletRed->addResource(new $javascript('delayed-javascript', 'static/delayJS.php'));
 $PageletRed->addJSCode("document.getElementById('red').innerHTML += ' [JS executed]';document.getElementById('red').style.borderRadius = '30px';");
 
 #===============================================================================
@@ -25,8 +25,8 @@ $PageletRed->addJSCode("document.getElementById('red').innerHTML += ' [JS execut
 #===============================================================================
 $PageletBlue = new $pagelet('bluePL', BigPipe\Pagelet::PRIORITY_HIGH);
 $PageletBlue->addHTML('<section id="blue" class="text">I AM A PAGELET WITH BLUE BACKGROUND</section>');
-$PageletBlue->addResource(new $stylesheet(NULL, 'static/blue.php'));
-$PageletBlue->addResource(new $javascript(NULL, 'static/delayJS.php'));
+$PageletBlue->addResource(new $stylesheet('blue-stylesheet', 'static/blue.php'));
+$PageletBlue->addResource(new $javascript('delayed-javascript', 'static/delayJS.php'));
 $PageletBlue->addJSCode("document.getElementById('blue').innerHTML += ' [JS executed]';document.getElementById('blue').style.borderRadius = '30px';");
 
 #===============================================================================
@@ -59,7 +59,7 @@ $PageletGreen = new $pagelet('greenPL');
 }
 
 $PageletGreen->addHTML('<section id="green" class="text">I AM A PAGELET WITH GREEN BACKGROUND'.$InnerPagelet.'</section>');
-$PageletGreen->addResource(new $stylesheet(NULL, 'static/green.php'));
-$PageletGreen->addResource(new $javascript(NULL, 'static/delayJS.php'));
+$PageletGreen->addResource(new $stylesheet('green-stylesheet', 'static/green.php'));
+$PageletGreen->addResource(new $javascript('delayed-javascript', 'static/delayJS.php'));
 $PageletGreen->addJSCode("document.getElementById('green').innerHTML += ' [JS executed]';document.getElementById('green').style.borderRadius = '30px';");
 ?>
