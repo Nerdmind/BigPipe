@@ -37,7 +37,7 @@ abstract class Item {
 	# Attach a PhaseDoneJS callback
 	#===============================================================================
 	public function addPhaseDoneJS($phase, $callback) {
-		return $this->phaseDoneJS[$phase][] = removeLineBreaksAndTabs($callback);
+		return $this->phaseDoneJS[$phase][] = $callback;
 	}
 }
 ?>

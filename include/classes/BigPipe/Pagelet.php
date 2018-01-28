@@ -141,7 +141,7 @@ class Pagelet extends Item {
 				Resource::TYPE_STYLESHEET => $stylesheets ?? [],
 				Resource::TYPE_JAVASCRIPT => $javascripts ?? []
 			],
-			'CODE' => removeLineBreaksAndTabs($this->getJSCode()),
+			'CODE' => $this->getJSCode(),
 			'PHASE' => $this->getPhaseDoneJS()
 		];
 	}
