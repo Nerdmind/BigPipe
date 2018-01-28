@@ -151,7 +151,7 @@ class Pagelet extends Item {
 	#===============================================================================
 	public function flush() {
 		if(BigPipe::enabled()) {
-			$pageletHTML = removeLineBreaksAndTabs($this->getHTML());
+			$pageletHTML = str_replace(["\r", "\n", "\t"], '', $this->getHTML());
 			$pageletHTML = str_replace('--', '&#45;&#45;', $pageletHTML);
 
 			$pageletJSON = json_encode($this->getStructure());
