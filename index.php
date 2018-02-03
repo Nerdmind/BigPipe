@@ -9,8 +9,6 @@ spl_autoload_register(function($classname) {
 	require_once sprintf($classpath, $classname);
 });
 
-require_once 'include/functions.php';
-
 #===============================================================================
 # Check if BigPipe should be disabled
 #===============================================================================

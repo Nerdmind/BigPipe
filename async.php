@@ -20,8 +20,6 @@ spl_autoload_register(function($classname) {
 	require_once sprintf($classpath, $classname);
 });
 
-require_once 'include/functions.php';
-
 #===============================================================================
 # Check if BigPipe should be disabled
 #===============================================================================
@@ -111,7 +109,7 @@ require_once 'include/pagelets.php';
 
 <?php endif;
 if(isAsyncRequest()) {
-	$BUFFER = removeLineBreaksAndTabs(ob_get_clean());
+	$BUFFER = ob_get_clean();
 	echo '<script>["Application","BigPipe"].forEach(function(name){window[name] = parent[name];});</script>'."\n";
 	echo '<script>Application.placeholderHTML('.json_encode($BUFFER).');</script>'."\n\n";
 }
