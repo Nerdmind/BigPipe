@@ -5,6 +5,19 @@
 $DEBUGGING = TRUE;
 
 #===============================================================================
+# Check if BigPipe should be disabled
+#===============================================================================
+if(isset($_GET['bigpipe']) AND $_GET['bigpipe'] === '0') {
+	# You can use this method to disable the pipeline for Googlebot or something
+	# else. If BigPipe is "disabled", then all pagelets will be rendered without
+	# being pipelined through the javascript library. The content of the pagelet
+	# will be present at the original position within the HTML response (and all
+	# external stylesheets and javascripts will be displayed as simple <link> or
+	# <script> elements within the HTML document).
+	BigPipe\BigPipe::enabled(FALSE);
+}
+
+#===============================================================================
 # Namespace paths based on whether the debugging mode is enabled
 #===============================================================================
 $pagelet    = ($DEBUGGING ? 'Debugging' : 'BigPipe').'\Pagelet';

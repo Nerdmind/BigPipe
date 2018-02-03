@@ -9,14 +9,6 @@ spl_autoload_register(function($classname) {
 	require_once sprintf($classpath, $classname);
 });
 
-#===============================================================================
-# Check if BigPipe should be disabled
-#===============================================================================
-if(isset($_GET['bigpipe']) AND (int) $_GET['bigpipe'] === 0) {
-	// You can also check for search spiders and disable the pipeline
-	BigPipe\BigPipe::enabled(FALSE);
-}
-
 // Outsourced to avoid duplicate code in index.php and async.php
 require_once 'include/pagelets.php';
 ?>
