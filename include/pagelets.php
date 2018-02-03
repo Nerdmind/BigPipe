@@ -64,9 +64,6 @@ $PageletGreen = Application::createPagelet('greenPL');
 	// pagelets are already displayed.
 
 	$InnerPagelet = Application::createPagelet('innerPL', BigPipe\Pagelet::PRIORITY_HIGHEST);
-
-	// NOTICE: You can also use the Pagelet ID (as string) as argument. May be helpful
-	// if a dependency Pagelet object is not accessible within the current scope.
 	$InnerPagelet->addDependency($PageletGreen);
 
 	$InnerPagelet->addHTML('<section sytle="background:#FFF;padding:5px;">Inner Pagelet \(o_o)/</section>');
