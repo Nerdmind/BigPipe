@@ -1,15 +1,4 @@
 <?php
-#===============================================================================
-# Include classes and functions
-#===============================================================================
-spl_autoload_register(function($classname) {
-	$classpath = 'include/classes/%s.php';
-	$classname = str_replace('\\', '/', $classname);
-
-	require_once sprintf($classpath, $classname);
-});
-
-// Outsourced to avoid duplicate code in index.php and async.php
 require_once 'include/pagelets.php';
 ?>
 <!DOCTYPE html>

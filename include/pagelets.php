@@ -5,6 +5,14 @@
 $DEBUGGING = TRUE;
 
 #===============================================================================
+# Autoload register for classes
+#===============================================================================
+spl_autoload_register(function($classname) {
+	$classname = str_replace('\\', '/', $classname);
+	require "classes/{$classname}.php";
+});
+
+#===============================================================================
 # Check if BigPipe should be disabled
 #===============================================================================
 if(isset($_GET['bigpipe']) AND $_GET['bigpipe'] === '0') {
