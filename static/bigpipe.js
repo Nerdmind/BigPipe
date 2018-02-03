@@ -37,15 +37,15 @@ BigPipe = (function() {
 	// Resource: Represents a resource
 	//==============================================================================
 	class Resource {
-		constructor(dataJSON, type) {
-			this.ID   = dataJSON.ID;
-			this.HREF = dataJSON.HREF;
+		constructor(data, type) {
+			this.ID   = data.ID;
+			this.HREF = data.HREF;
 			this.callbacks = [];
 			this.node = false;
 			this.done = false;
 			this.type = type;
 
-			this.phaseDoneJS = dataJSON.PHASE;
+			this.phaseDoneJS = data.PHASE;
 			this.phase = 0;
 
 			PhaseDoneJS.handler(this, Resource.PHASE_INIT);
@@ -133,14 +133,14 @@ BigPipe = (function() {
 	// Pagelet: Represents a pagelet
 	//==============================================================================
 	class Pagelet {
-		constructor(dataJSON, HTML) {
-			this.ID   = dataJSON.ID;
-			this.NEED = dataJSON.NEED;
+		constructor(data, HTML) {
+			this.ID   = data.ID;
+			this.NEED = data.NEED;
 			this.HTML = HTML;
-			this.JSCode = dataJSON.CODE;
-			this.phaseDoneJS = dataJSON.PHASE;
-			this.stylesheets = dataJSON.RSRC[Resource.TYPE_STYLESHEET];
-			this.javascripts = dataJSON.RSRC[Resource.TYPE_JAVASCRIPT];
+			this.JSCode = data.CODE;
+			this.phaseDoneJS = data.PHASE;
+			this.stylesheets = data.RSRC[Resource.TYPE_STYLESHEET];
+			this.javascripts = data.RSRC[Resource.TYPE_JAVASCRIPT];
 
 			this.phase = 0;
 			this.resources = [[], []];
