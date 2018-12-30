@@ -89,10 +89,6 @@ class BigPipe {
 				}
 			}
 		}
-
-		if(self::enabled()) {
-			echo "<script>BigPipe.onLastPageletArrived();</script>\n";
-		}
 	}
 }
 ?>

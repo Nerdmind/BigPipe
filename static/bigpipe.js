@@ -272,7 +272,27 @@ BigPipe = (function() {
 		wait: [],
 		interval: null,
 
+		eventNode: document,
+		eventName: "DOMContentLoaded",
+		eventFunc: function() {
+			BigPipe.onLastPageletArrived();
+			BigPipe.unregisterEventListener();
+		},
+
+		registerEventListener() {
+			this.eventNode.addEventListener(this.eventName, this.eventFunc, false);
+		},
+
+		unregisterEventListener() {
+			this.eventNode.removeEventListener(this.eventName, this.eventFunc, false);
+		},
+
 		onPageletArrive(data, codeContainer) {
+			if(this.phase === 0) {
+				this.phase = 1;
+				this.registerEventListener();
+			}
+
 			let pageletHTML = codeContainer.innerHTML;
 			pageletHTML = pageletHTML.substring(5, pageletHTML.length - 4);
 			codeContainer.parentNode.removeChild(codeContainer);
@@ -280,10 +300,6 @@ BigPipe = (function() {
 			let pagelet = new Pagelet(data, pageletHTML);
 
 			this.pagelets.push(pagelet);
-
-			if(this.phase === 0) {
-				this.phase = 1;
-			}
 
 			if(pagelet.NEED.length === 0 || pagelet.NEED.every(function(needID) {
 					return BigPipe.done.indexOf(needID) !== -1;
@@ -339,12 +355,16 @@ BigPipe = (function() {
 	// Public-Access
 	//==============================================================================
 	return {
-		onPageletArrive(data, codeContainer) {
-			BigPipe.onPageletArrive(data, codeContainer);
+		setLastPageletEventNode(eventNode) {
+			BigPipe.eventNode = eventNode;
 		},
 
-		onLastPageletArrived() {
-			BigPipe.onLastPageletArrived();
+		setLastPageletEventName(eventName) {
+			BigPipe.eventName = eventName;
+		},
+
+		onPageletArrive(data, codeContainer) {
+			BigPipe.onPageletArrive(data, codeContainer);
 		},
 
 		reset() {
