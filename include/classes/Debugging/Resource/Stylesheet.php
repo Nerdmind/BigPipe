@@ -2,7 +2,7 @@
 namespace Debugging\Resource;
 
 class Stylesheet extends \BigPipe\Resource\Stylesheet {
-	public function __construct($customID = NULL, $resourceURL) {
+	public function __construct($customID, $resourceURL) {
 		parent::__construct(...func_get_args());
 
 		foreach(['INIT', 'LOAD', 'DONE'] as $phase) {
