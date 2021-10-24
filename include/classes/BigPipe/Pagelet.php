@@ -83,43 +83,43 @@ class Pagelet extends Item {
 	#===============================================================================
 	# Add HTML or attach more
 	#===============================================================================
-	public function addHTML($HTML) {
-		return $this->HTML .= $HTML;
+	public function addHTML($HTML): void {
+		$this->HTML .= $HTML;
 	}
 
 	#===============================================================================
 	# Add resource
 	#===============================================================================
-	public function addResource(Resource $Resource): Resource {
-		return $this->resources[$Resource->getType()][] = $Resource;
+	public function addResource(Resource $Resource): void {
+		$this->resources[$Resource->getType()][] = $Resource;
 	}
 
 	#===============================================================================
 	# Attach a main JS code part
 	#===============================================================================
-	public function addJSCode($code) {
-		return $this->JSCode[] = $code;
+	public function addJSCode($code): void {
+		$this->JSCode[] = $code;
 	}
 
 	#===============================================================================
 	# Attach a display dependency
 	#===============================================================================
-	public function addDependency(Pagelet $Pagelet) {
-		return $this->dependencies[] = $Pagelet->getID();
+	public function addDependency(Pagelet $Pagelet): void {
+		$this->dependencies[] = $Pagelet->getID();
 	}
 
 	#===============================================================================
 	# Set custom placeholder tag name
 	#===============================================================================
-	public function setTagName($tagName) {
-		return $this->tagName = $tagName;
+	public function setTagName($tagName): void {
+		$this->tagName = $tagName;
 	}
 
 	#===============================================================================
 	# Set custom placeholder HTML
 	#===============================================================================
-	public function setPlaceholderHTML($HTML) {
-		return $this->tagHTML = $HTML;
+	public function setPlaceholderHTML($HTML): void {
+		$this->tagHTML = $HTML;
 	}
 
 	#===============================================================================
