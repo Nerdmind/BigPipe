@@ -22,7 +22,7 @@ if(isset($_GET['bigpipe']) AND $_GET['bigpipe'] === '0') {
 	# will be present at the original position within the HTML response (and all
 	# external stylesheets and javascripts will be displayed as simple <link> or
 	# <script> elements within the HTML document).
-	BigPipe\BigPipe::enabled(FALSE);
+	BigPipe\BigPipe::setEnabled(FALSE);
 }
 
 #===============================================================================

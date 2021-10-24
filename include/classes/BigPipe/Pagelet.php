@@ -150,7 +150,7 @@ class Pagelet extends Item {
 	# Flush pagelet immediately
 	#===============================================================================
 	public function flush() {
-		if(BigPipe::enabled()) {
+		if(BigPipe::isEnabled()) {
 			$pageletHTML = str_replace(["\r", "\n", "\t"], '', $this->getHTML());
 			$pageletHTML = str_replace('--', '&#45;&#45;', $pageletHTML);
 
@@ -169,7 +169,7 @@ class Pagelet extends Item {
 	#===============================================================================
 	public function __toString() {
 		$pageletHTML  = "<{$this->tagName} id=\"{$this->getID()}\">";
-		$pageletHTML .= !BigPipe::enabled() ? $this->getHTML() : $this->tagHTML;
+		$pageletHTML .= !BigPipe::isEnabled() ? $this->getHTML() : $this->tagHTML;
 		$pageletHTML .= "</{$this->tagName}>";
 
 		return $pageletHTML;

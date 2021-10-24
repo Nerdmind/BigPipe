@@ -15,14 +15,17 @@ class BigPipe {
 	private static $pagelets = [];
 
 	#===============================================================================
-	# Enable or disable the pipeline mode
+	# Check if pipelining mode is enabled
 	#===============================================================================
-	public static function enabled($change = NULL) {
-		if($change !== NULL) {
-			self::$enabled = (bool) $change;
-		}
-
+	public static function isEnabled(): bool {
 		return self::$enabled;
+	}
+
+	#===============================================================================
+	# Enable or disable the pipelining mode
+	#===============================================================================
+	public static function setEnabled(bool $enabled): void {
+		self::$enabled = $enabled;
 	}
 
 	#===============================================================================
@@ -63,7 +66,7 @@ class BigPipe {
 		if(!empty($pagelets_ordered)) {
 			$pagelets = call_user_func_array('array_merge', $pagelets_ordered);
 
-			if(self::enabled()) {
+			if(self::isEnabled()) {
 				foreach($pagelets as $Pagelet) {
 					$Pagelet->flush();
 				}
@@ -90,7 +93,7 @@ class BigPipe {
 			}
 		}
 
-		if(self::enabled()) {
+		if(self::isEnabled()) {
 			echo "<script>BigPipe.onLastPageletArrived();</script>\n";
 		}
 	}

@@ -29,7 +29,7 @@ require_once 'include/pagelets.php';
 	<!-- >>> [Additional code for the async function] -->
 	<script>
 		var Application = {
-			bigPipeEnabled: <?=json_encode(BigPipe\BigPipe::enabled())?>,
+			bigPipeEnabled: <?=json_encode(BigPipe\BigPipe::isEnabled())?>,
 
 			placeholderHTML: function(HTML) {
 				document.getElementById('placeholder_container').innerHTML = HTML;
