@@ -13,7 +13,7 @@ class Javascript extends \BigPipe\Resource {
 	#===============================================================================
 	# Build resource
 	#===============================================================================
-	public function __construct(string $id, string $url) {
+	public function __construct(?string $id, string $url) {
 		parent::__construct($id, parent::TYPE_JAVASCRIPT, $url);
 	}
 

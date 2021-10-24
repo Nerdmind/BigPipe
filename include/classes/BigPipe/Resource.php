@@ -33,7 +33,7 @@ abstract class Resource extends Item {
 	#===============================================================================
 	# Build resource
 	#===============================================================================
-	public function __construct(string $id, int $type, string $url) {
+	public function __construct(?string $id, int $type, string $url) {
 		$this->id = $id ?? spl_object_hash($this);
 		$this->type = $type;
 		$this->url = $url;
