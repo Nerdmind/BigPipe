@@ -175,4 +175,3 @@ class Pagelet extends Item {
 		return $pageletHTML;
 	}
 }
-?>

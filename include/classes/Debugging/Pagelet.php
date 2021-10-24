@@ -11,4 +11,3 @@ class Pagelet extends \BigPipe\Pagelet {
 		}
 	}
 }
-?>

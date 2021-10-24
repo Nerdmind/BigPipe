@@ -35,4 +35,3 @@ class Application {
 		return $Javascript;
 	}
 }
-?>

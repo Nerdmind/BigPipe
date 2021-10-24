@@ -11,4 +11,3 @@ class Javascript extends \BigPipe\Resource\Javascript {
 		}
 	}
 }
-?>

@@ -40,4 +40,3 @@ abstract class Item {
 		return $this->phaseDoneJS[$phase][] = $callback;
 	}
 }
-?>

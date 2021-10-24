@@ -24,4 +24,3 @@ class Stylesheet extends \BigPipe\Resource {
 		return sprintf('<link data-id="%s" href="%s" rel="stylesheet" />', $this->getID(), $this->getURL());
 	}
 }
-?>

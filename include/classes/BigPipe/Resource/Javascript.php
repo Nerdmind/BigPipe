@@ -24,4 +24,3 @@ class Javascript extends \BigPipe\Resource {
 		return sprintf('<script data-id="%s" src="%s"></script>', $this->getID(), $this->getURL());
 	}
 }
-?>

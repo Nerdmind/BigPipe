@@ -11,4 +11,3 @@ class Stylesheet extends \BigPipe\Resource\Stylesheet {
 		}
 	}
 }
-?>

@@ -62,4 +62,3 @@ abstract class Resource extends Item {
 		return ['ID' => $this->getID(), 'HREF' => $this->getURL(), 'PHASE' => $this->getPhaseDoneJS()];
 	}
 }
-?>

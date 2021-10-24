@@ -73,4 +73,3 @@ $PageletGreen->addHTML('<section id="green" class="text">I AM A PAGELET WITH GRE
 $PageletGreen->addResource(Application::createStylesheet('green-stylesheet', 'static/green.php'));
 $PageletGreen->addResource(Application::createJavascript('delayed-javascript', 'static/delayJS.php'));
 $PageletGreen->addJSCode("document.getElementById('green').innerHTML += ' [JS executed]';document.getElementById('green').style.borderRadius = '30px';");
-?>
