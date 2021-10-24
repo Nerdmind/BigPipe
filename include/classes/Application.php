@@ -5,7 +5,7 @@ class Application {
 	#===============================================================================
 	# Create Pagelet instance
 	#===============================================================================
-	public static function createPagelet($ID = NULL): BigPipe\Pagelet {
+	public static function createPagelet(string $ID = NULL): BigPipe\Pagelet {
 		$namespace = self::$debugging ? 'Debugging' : 'BigPipe';
 		$classname = "{$namespace}\Pagelet";
 
@@ -16,7 +16,7 @@ class Application {
 	#===============================================================================
 	# Create Stylesheet instance
 	#===============================================================================
-	public static function createStylesheet($ID, $href): BigPipe\Resource\Stylesheet {
+	public static function createStylesheet(string $ID, string $href): BigPipe\Resource\Stylesheet {
 		$namespace = self::$debugging ? 'Debugging' : 'BigPipe';
 		$classname = "{$namespace}\Resource\Stylesheet";
 
@@ -27,7 +27,7 @@ class Application {
 	#===============================================================================
 	# Create Javascript instance
 	#===============================================================================
-	public static function createJavascript($ID, $href): BigPipe\Resource\Javascript {
+	public static function createJavascript(string $ID, string $href): BigPipe\Resource\Javascript {
 		$namespace = self::$debugging ? 'Debugging' : 'BigPipe';
 		$classname = "{$namespace}\Resource\Javascript";
 

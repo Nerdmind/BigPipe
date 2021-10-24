@@ -15,7 +15,7 @@ abstract class Resource extends Item {
 	#===============================================================================
 	# Render resource HTML for disabled pipeline
 	#===============================================================================
-	abstract public function renderHTML();
+	abstract public function renderHTML(): string;
 
 	#===============================================================================
 	# Resource types
@@ -33,7 +33,7 @@ abstract class Resource extends Item {
 	#===============================================================================
 	# Build resource
 	#===============================================================================
-	public function __construct($customID, $type, $resourceURL) {
+	public function __construct(string $customID, int $type, string $resourceURL) {
 		$this->ID = $customID ?? spl_object_hash($this);
 		$this->type = $type;
 		$this->resourceURL = $resourceURL;
@@ -44,14 +44,14 @@ abstract class Resource extends Item {
 	#===============================================================================
 	# Return the resource type
 	#===============================================================================
-	public function getType() {
+	public function getType(): int {
 		return $this->type;
 	}
 
 	#===============================================================================
 	# Return the resource URL
 	#===============================================================================
-	public function getURL() {
+	public function getURL(): string {
 		return $this->resourceURL;
 	}
 

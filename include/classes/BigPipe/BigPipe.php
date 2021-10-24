@@ -31,28 +31,28 @@ class BigPipe {
 	#===============================================================================
 	# Insert pagelet into queue
 	#===============================================================================
-	public static function enqueue(Pagelet $Pagelet) {
+	public static function enqueue(Pagelet $Pagelet): void {
 		self::$pagelets[spl_object_hash($Pagelet)] = $Pagelet;
 	}
 
 	#===============================================================================
 	# Remove pagelet from queue
 	#===============================================================================
-	public static function dequeue(Pagelet $Pagelet) {
+	public static function dequeue(Pagelet $Pagelet): void {
 		unset(self::$pagelets[spl_object_hash($Pagelet)]);
 	}
 
 	#===============================================================================
 	# Sends output buffer so far as possible towards user
 	#===============================================================================
-	public static function flushOutputBuffer() {
+	public static function flushOutputBuffer(): void {
 		ob_flush(); flush();
 	}
 
 	#===============================================================================
 	# Renders all remaining pagelets from the queue in the appropriate order
 	#===============================================================================
-	public static function completeResponse() {
+	public static function completeResponse(): void {
 		self::flushOutputBuffer();
 
 		$pagelets_ordered = [];

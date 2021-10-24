@@ -22,7 +22,7 @@ abstract class Item {
 	#===============================================================================
 	# Return the unique ID
 	#===============================================================================
-	public function getID() {
+	public function getID(): string {
 		return $this->ID;
 	}
 
@@ -36,7 +36,7 @@ abstract class Item {
 	#===============================================================================
 	# Attach a PhaseDoneJS callback
 	#===============================================================================
-	public function addPhaseDoneJS($phase, $code): void {
+	public function addPhaseDoneJS(int $phase, string $code): void {
 		$this->phaseDoneJS[$phase][] = $code;
 	}
 }

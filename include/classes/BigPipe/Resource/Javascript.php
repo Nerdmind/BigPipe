@@ -13,14 +13,14 @@ class Javascript extends \BigPipe\Resource {
 	#===============================================================================
 	# Build resource
 	#===============================================================================
-	public function __construct($customID, $resourceURL) {
+	public function __construct(string $customID, string $resourceURL) {
 		parent::__construct($customID, parent::TYPE_JAVASCRIPT, $resourceURL);
 	}
 
 	#===============================================================================
 	# Render resource HTML
 	#===============================================================================
-	public function renderHTML() {
+	public function renderHTML(): string {
 		return sprintf('<script data-id="%s" src="%s"></script>', $this->getID(), $this->getURL());
 	}
 }

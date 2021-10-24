@@ -35,7 +35,7 @@ class Pagelet extends Item {
 	const PHASE_LOADJS  = 3; # After all the JS resources have been loaded
 	const PHASE_DONE    = 4; # After the static JS code has been executed
 
-	public function __construct($customID = NULL, $priority = self::PRIORITY_NORMAL) {
+	public function __construct(string $customID = NULL, int $priority = self::PRIORITY_NORMAL) {
 		$this->ID = $customID ?? spl_object_hash($this);
 
 		$this->priority    = $priority;
@@ -48,14 +48,14 @@ class Pagelet extends Item {
 	#===============================================================================
 	# Return the priority
 	#===============================================================================
-	public function getPriority() {
+	public function getPriority(): int {
 		return $this->priority;
 	}
 
 	#===============================================================================
 	# Return the HTML content
 	#===============================================================================
-	public function getHTML() {
+	public function getHTML(): string {
 		return $this->HTML;
 	}
 
@@ -83,7 +83,7 @@ class Pagelet extends Item {
 	#===============================================================================
 	# Add HTML or attach more
 	#===============================================================================
-	public function addHTML($HTML): void {
+	public function addHTML(string $HTML): void {
 		$this->HTML .= $HTML;
 	}
 
@@ -97,7 +97,7 @@ class Pagelet extends Item {
 	#===============================================================================
 	# Attach a main JS code part
 	#===============================================================================
-	public function addJSCode($code): void {
+	public function addJSCode(string $code): void {
 		$this->JSCode[] = $code;
 	}
 
@@ -111,14 +111,14 @@ class Pagelet extends Item {
 	#===============================================================================
 	# Set custom placeholder tag name
 	#===============================================================================
-	public function setTagName($tagName): void {
+	public function setTagName(string $tagName): void {
 		$this->tagName = $tagName;
 	}
 
 	#===============================================================================
 	# Set custom placeholder HTML
 	#===============================================================================
-	public function setPlaceholderHTML($HTML): void {
+	public function setPlaceholderHTML(string $HTML): void {
 		$this->tagHTML = $HTML;
 	}
 
@@ -149,7 +149,7 @@ class Pagelet extends Item {
 	#===============================================================================
 	# Flush pagelet immediately
 	#===============================================================================
-	public function flush() {
+	public function flush(): void {
 		if(BigPipe::isEnabled()) {
 			$pageletHTML = str_replace(["\r", "\n", "\t"], '', $this->getHTML());
 			$pageletHTML = str_replace('--', '&#45;&#45;', $pageletHTML);
@@ -167,7 +167,7 @@ class Pagelet extends Item {
 	#===============================================================================
 	# Magic method: __toString()
 	#===============================================================================
-	public function __toString() {
+	public function __toString(): string {
 		$pageletHTML  = "<{$this->tagName} id=\"{$this->getID()}\">";
 		$pageletHTML .= !BigPipe::isEnabled() ? $this->getHTML() : $this->tagHTML;
 		$pageletHTML .= "</{$this->tagName}>";
