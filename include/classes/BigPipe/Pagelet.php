@@ -14,7 +14,7 @@ class Pagelet extends Item {
 	private $priority     = NULL;
 	private $resources    = [];
 	private $dependencies = [];
-	private $tagname      = 'div';
+	private $tagName      = 'div';
 	private $tagHTML      = '';
 
 	#===============================================================================
@@ -109,10 +109,10 @@ class Pagelet extends Item {
 	}
 
 	#===============================================================================
-	# Set custom placeholder tagname
+	# Set custom placeholder tag name
 	#===============================================================================
-	public function setTagname($tagname) {
-		return $this->tagname = $tagname;
+	public function setTagName($tagName) {
+		return $this->tagName = $tagName;
 	}
 
 	#===============================================================================
@@ -168,9 +168,9 @@ class Pagelet extends Item {
 	# Magic method: __toString()
 	#===============================================================================
 	public function __toString() {
-		$pageletHTML  = "<{$this->tagname} id=\"{$this->getID()}\">";
+		$pageletHTML  = "<{$this->tagName} id=\"{$this->getID()}\">";
 		$pageletHTML .= !BigPipe::enabled() ? $this->getHTML() : $this->tagHTML;
-		$pageletHTML .= "</{$this->tagname}>";
+		$pageletHTML .= "</{$this->tagName}>";
 
 		return $pageletHTML;
 	}
