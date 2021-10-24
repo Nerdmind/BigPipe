@@ -59,6 +59,10 @@ abstract class Resource extends Item {
 	# Return the resource structure
 	#===============================================================================
 	public function getStructure(): array {
-		return ['ID' => $this->getID(), 'HREF' => $this->getURL(), 'PHASE' => $this->getPhaseDoneJS()];
+		return [
+			'ID' => $this->getID(),
+			'HREF' => $this->getURL(),
+			'PHASE' => $this->getPhaseDoneJS()
+		];
 	}
 }
