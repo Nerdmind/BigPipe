@@ -36,7 +36,7 @@ abstract class Item {
 	#===============================================================================
 	# Attach a PhaseDoneJS callback
 	#===============================================================================
-	public function addPhaseDoneJS($phase, $callback) {
-		return $this->phaseDoneJS[$phase][] = $callback;
+	public function addPhaseDoneJS($phase, $code) {
+		return $this->phaseDoneJS[$phase][] = $code;
 	}
 }
