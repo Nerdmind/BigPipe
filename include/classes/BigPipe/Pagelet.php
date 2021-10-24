@@ -35,8 +35,8 @@ class Pagelet extends Item {
 	const PHASE_LOADJS  = 3; # After all the JS resources have been loaded
 	const PHASE_DONE    = 4; # After the static JS code has been executed
 
-	public function __construct(string $customID = NULL, int $priority = self::PRIORITY_NORMAL) {
-		$this->ID = $customID ?? spl_object_hash($this);
+	public function __construct(string $id = NULL, int $priority = self::PRIORITY_NORMAL) {
+		$this->id = $id ?? spl_object_hash($this);
 
 		$this->priority    = $priority;
 		$this->resources   = array_pad($this->resources,   2, []);

@@ -13,8 +13,8 @@ class Stylesheet extends \BigPipe\Resource {
 	#===============================================================================
 	# Build resource
 	#===============================================================================
-	public function __construct(string $customID, string $resourceURL) {
-		parent::__construct($customID, parent::TYPE_STYLESHEET, $resourceURL);
+	public function __construct(string $id, string $url) {
+		parent::__construct($id, parent::TYPE_STYLESHEET, $url);
 	}
 
 	#===============================================================================

@@ -11,7 +11,7 @@
 namespace BigPipe;
 
 abstract class Item {
-	protected $ID = '';
+	protected $id = '';
 	protected $phaseDoneJS = [];
 
 	#===============================================================================
@@ -23,7 +23,7 @@ abstract class Item {
 	# Return the unique ID
 	#===============================================================================
 	public function getID(): string {
-		return $this->ID;
+		return $this->id;
 	}
 
 	#===============================================================================

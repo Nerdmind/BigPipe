@@ -2,7 +2,7 @@
 namespace Debugging;
 
 class Pagelet extends \BigPipe\Pagelet {
-	public function __construct(string $customID = NULL, int $priority = self::PRIORITY_NORMAL) {
+	public function __construct(string $id = NULL, int $priority = self::PRIORITY_NORMAL) {
 		parent::__construct(...func_get_args());
 
 		foreach(['INIT', 'LOADCSS', 'HTML', 'LOADJS', 'DONE'] as $phase) {
